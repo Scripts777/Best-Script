@@ -8,8 +8,8 @@ gui.Name = "BackpackDupeGUI"
 gui.ResetOnSpawn = false
 
 local frame = Instance.new("Frame", gui)
-frame.Size = UDim2.new(0, 250, 0, 210)
-frame.Position = UDim2.new(0.5, -125, 0.5, -105)
+frame.Size = UDim2.new(0, 250, 0, 230)
+frame.Position = UDim2.new(0.5, -125, 0.5, -115)
 frame.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
 frame.BorderSizePixel = 0
 
@@ -65,15 +65,15 @@ dropdown.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
 dropdown.TextColor3 = Color3.new(1,1,1)
 
 local dupeOne = Instance.new("TextButton", frame)
-dupeOne.Size = UDim2.new(0.48, -10, 0, 30)
-dupeOne.Position = UDim2.new(0, 10, 0, 170)
+dupeOne.Size = UDim2.new(0.48, -5, 0, 30)
+dupeOne.Position = UDim2.new(0, 10, 0, 190)
 dupeOne.Text = "DUPE"
 dupeOne.BackgroundColor3 = Color3.fromRGB(0, 150, 0)
 dupeOne.TextColor3 = Color3.new(1,1,1)
 
 local dupeAll = Instance.new("TextButton", frame)
-dupeAll.Size = UDim2.new(0.48, -10, 0, 30)
-dupeAll.Position = UDim2.new(0.52, 0, 0, 170)
+dupeAll.Size = UDim2.new(0.48, -5, 0, 30)
+dupeAll.Position = UDim2.new(0.52, 0, 0, 190)
 dupeAll.Text = "DUPE ВСЁ"
 dupeAll.BackgroundColor3 = Color3.fromRGB(150, 0, 0)
 dupeAll.TextColor3 = Color3.new(1,1,1)
@@ -89,6 +89,7 @@ dropdownFrame.ScrollBarThickness = 6
 dropdownFrame.BorderSizePixel = 0
 
 local selectedItem = nil
+local alreadyCloned = {}
 
 -- Слова-фильтры
 local blockedWords = {
@@ -99,6 +100,7 @@ local blockedWords = {
 -- Проверка
 local function isAllowed(item)
     if item:IsA("ObjectValue") then return false end
+    if alreadyCloned[item.Name] then return false end
     for _, word in ipairs(blockedWords) do
         if string.find(item.Name:lower(), word:lower()) then
             return false
@@ -116,7 +118,7 @@ local function updateItemList()
             local btn = Instance.new("TextButton", dropdownFrame)
             btn.Size = UDim2.new(1, 0, 0, 24)
             btn.Position = UDim2.new(0, 0, 0, y)
-            btn.Text = item.Name .. " (" .. item.ClassName .. ")"
+            btn.Text = item.Name -- Убираем (Tool)
             btn.BackgroundColor3 = Color3.fromRGB(80, 80, 80)
             btn.TextColor3 = Color3.new(1,1,1)
             btn.TextScaled = true
@@ -141,12 +143,14 @@ dropdown.MouseButton1Click:Connect(function()
     end
 end)
 
--- DUPE одного предмета
+-- DUPE одного
 dupeOne.MouseButton1Click:Connect(function()
     if selectedItem then
         local clone = selectedItem:Clone()
         clone.Parent = backpack
+        alreadyCloned[selectedItem.Name] = true
         print("Клон добавлен:", selectedItem.Name)
+        updateItemList()
     else
         warn("Сначала выбери предмет.")
     end
@@ -159,8 +163,10 @@ dupeAll.MouseButton1Click:Connect(function()
         if isAllowed(item) then
             local clone = item:Clone()
             clone.Parent = backpack
+            alreadyCloned[item.Name] = true
             count += 1
         end
     end
-    print("Добавлено клонов:", count)
+    print("Клонов добавлено:", count)
+    updateItemList()
 end)
