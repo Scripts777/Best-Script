@@ -1,32 +1,58 @@
 -- Grow a Garden Local Cloning Script for Delta Executor
--- Safe, visual, local script with Rayfield GUI for cloning Backpack items
--- Features: Pets/Fruits tabs with icons, Age/Weight customization, dynamic Age field visibility
+-- Safe, visual, local script with native Roblox GUI for cloning Backpack items
+-- Features: Pets/Fruits tabs, Age/Weight customization, dynamic Age field visibility
 
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
 local Backpack = LocalPlayer:WaitForChild("Backpack")
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local UserInputService = game:GetService("UserInputService")
+local StarterGui = game:GetService("StarterGui")
 
--- Load Rayfield Interface Suite
-local Rayfield = loadstring(game:HttpGet('https://raw.githubusercontent.com/Rayfield/Rayfield/main/Loader.lua'))()
+-- Create ScreenGui
+local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Parent = LocalPlayer:WaitForChild("PlayerGui")
+ScreenGui.Name = "GrowAGardenCloner"
+ScreenGui.ResetOnSpawn = false
 
--- Create GUI Window
-local Window = Rayfield:CreateWindow({
-    Name = "Grow a Garden Cloner",
-    LoadingTitle = "Grow a Garden Cloner",
-    LoadingSubtitle = "by xAI User",
-    ConfigurationSaving = {
-        Enabled = true,
-        FolderName = "GrowAGardenCloner",
-        FileName = "Config"
-    }
-})
+-- Create Main Frame
+local MainFrame = Instance.new("Frame")
+MainFrame.Size = UDim2.new(0, 400, 0, 300)
+MainFrame.Position = UDim2.new(0.5, -200, 0.5, -150)
+MainFrame.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+MainFrame.BorderSizePixel = 0
+MainFrame.Parent = ScreenGui
 
--- Function to get item thumbnail (simplified, using asset ID or fallback)
-local function getItemThumbnail(item)
-    -- Placeholder: In a real implementation, fetch thumbnail via Roblox API or asset ID
-    -- For simplicity, return item name as fallback (Rayfield dropdowns don't natively support images)
-    return item.Name
+-- Create Title
+local Title = Instance.new("TextLabel")
+Title.Size = UDim2.new(1, 0, 0, 30)
+Title.Position = UDim2.new(0, 0, 0, 0)
+Title.Text = "Grow a Garden Cloner"
+Title.TextColor3 = Color3.fromRGB(255, 255, 255)
+Title.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+Title.TextScaled = true
+Title.Parent = MainFrame
+
+-- Create Tab Frame (Left Side)
+local TabFrame = Instance.new("Frame")
+TabFrame.Size = UDim2.new(0, 100, 1, -30)
+TabFrame.Position = UDim2.new(0, 0, 0, 30)
+TabFrame.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+TabFrame.Parent = MainFrame
+
+-- Create Content Frame (Right Side)
+local ContentFrame = Instance.new("Frame")
+ContentFrame.Size = UDim2.new(0, 300, 1, -30)
+ContentFrame.Position = UDim2.new(0, 100, 0, 30)
+ContentFrame.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+ContentFrame.Parent = MainFrame
+
+-- Function to clear ContentFrame
+local function clearContent()
+    for _, child in pairs(ContentFrame:GetChildren()) do
+        if child ~= ContentFrame then
+            child:Destroy()
+        end
+    end
 end
 
 -- Function to check if item name contains excluded words
@@ -47,11 +73,10 @@ local function getBackpackItems()
     for _, item in pairs(Backpack:GetChildren()) do
         if item:IsA("Tool") and not isExcludedItem(item.Name) then
             local ageAttr = item:GetAttribute("Age")
-            local itemName = getItemThumbnail(item)
             if ageAttr then
-                table.insert(pets, itemName)
+                table.insert(pets, item.Name)
             else
-                table.insert(fruits, itemName)
+                table.insert(fruits, item.Name)
             end
         end
     end
@@ -61,7 +86,7 @@ end
 -- Function to clone item with modified attributes and name
 local function cloneItem(itemName, weight, age)
     for _, item in pairs(Backpack:GetChildren()) do
-        if item:IsA("Tool") and getItemThumbnail(item) == itemName then
+        if item:IsA("Tool") and item.Name == itemName then
             local clonedItem = item:Clone()
             clonedItem.Parent = Backpack
             -- Set attributes
@@ -73,9 +98,10 @@ local function cloneItem(itemName, weight, age)
             local weightStr = string.format("[%.2f KG]", weight)
             local ageStr = age and string.format("[Age %d]", age) or ""
             clonedItem.Name = item.Name .. " " .. weightStr .. " " .. ageStr
-            Rayfield:Notify({
+            -- Notify
+            StarterGui:SetCore("SendNotification", {
                 Title = "Item Cloned",
-                Content = "Cloned " .. itemName .. " with Weight: " .. weight .. (age and " and Age: " .. age or ""),
+                Text = "Cloned " .. itemName .. " with Weight: " .. weight .. (age and " and Age: " .. age or ""),
                 Duration = 3
             })
             break
@@ -83,115 +109,207 @@ local function cloneItem(itemName, weight, age)
     end
 end
 
--- Create Pets Tab
-local PetsTab = Window:CreateTab("Pets", nil) -- No icon, using text for simplicity
-local pets, fruits = getBackpackItems()
+-- Create Dropdown (simplified, using TextButton list)
+local function createDropdown(parent, name, options, callback)
+    local DropdownFrame = Instance.new("ScrollingFrame")
+    DropdownFrame.Size = UDim2.new(1, -10, 0, 100)
+    DropdownFrame.Position = UDim2.new(0, 5, 0, 30)
+    DropdownFrame.BackgroundTransparency = 1
+    DropdownFrame.ScrollBarThickness = 5
+    DropdownFrame.Parent = parent
 
-local PetDropdown = PetsTab:CreateDropdown({
-    Name = "Select Pet",
-    Options = pets,
-    CurrentOption = pets[1] or "No Pets Available",
-    Callback = function(option)
-        -- Store selected pet
-        getgenv().SelectedPet = option
+    local UIListLayout = Instance.new("UIListLayout")
+    UIListLayout.SortOrder = Enum.SortOrder.LayoutOrder
+    UIListLayout.Parent = DropdownFrame
+
+    local Label = Instance.new("TextLabel")
+    Label.Size = UDim2.new(1, 0, 0, 20)
+    Label.Position = UDim2.new(0, 5, 0, 5)
+    Label.Text = name
+    Label.TextColor3 = Color3.fromRGB(255, 255, 255)
+    Label.BackgroundTransparency = 1
+    Label.TextScaled = true
+    Label.Parent = parent
+
+    for i, option in ipairs(options) do
+        local Button = Instance.new("TextButton")
+        Button.Size = UDim2.new(1, -10, 0, 30)
+        Button.Text = option
+        Button.TextColor3 = Color3.fromRGB(255, 255, 255)
+        Button.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+        Button.TextScaled = true
+        Button.LayoutOrder = i
+        Button.Parent = DropdownFrame
+        Button.MouseButton1Click:Connect(function()
+            callback(option)
+        end)
     end
-})
-
-local WeightInputPets = PetsTab:CreateInput({
-    Name = "Weight (KG)",
-    PlaceholderText = "Enter weight (e.g., 10.5)",
-    RemoveTextAfterFocusLost = false,
-    Callback = function(text)
-        getgenv().PetWeight = tonumber(text) or 10
-    end
-})
-
-local AgeInput = PetsTab:CreateInput({
-    Name = "Age",
-    PlaceholderText = "Enter age (e.g., 5)",
-    RemoveTextAfterFocusLost = false,
-    Callback = function(text)
-        getgenv().PetAge = tonumber(text) or 1
-    end
-})
-
-local ClonePetButton = PetsTab:CreateButton({
-    Name = "Clone Pet",
-    Callback = function()
-        if getgenv().SelectedPet and getgenv().PetWeight then
-            cloneItem(getgenv().SelectedPet, getgenv().PetWeight, getgenv().PetAge)
-        else
-            Rayfield:Notify({
-                Title = "Error",
-                Content = "Please select a pet and enter a valid weight.",
-                Duration = 3
-            })
-        end
-    end
-})
-
--- Create Fruits Tab
-local FruitsTab = Window:CreateTab("Fruits", nil)
-local FruitDropdown = FruitsTab:CreateDropdown({
-    Name = "Select Fruit",
-    Options = fruits,
-    CurrentOption = fruits[1] or "No Fruits Available",
-    Callback = function(option)
-        getgenv().SelectedFruit = option
-        -- Hide Age input when Fruits tab is active
-        AgeInput:SetVisibility(false)
-    end
-})
-
-local WeightInputFruits = FruitsTab:CreateInput({
-    Name = "Weight (KG)",
-    PlaceholderText = "Enter weight (e.g., 10.5)",
-    RemoveTextAfterFocusLost = false,
-    Callback = function(text)
-        getgenv().FruitWeight = tonumber(text) or 10
-    end
-})
-
-local CloneFruitButton = FruitsTab:CreateButton({
-    Name = "Clone Fruit",
-    Callback = function()
-        if getgenv().SelectedFruit and getgenv().FruitWeight then
-            cloneItem(getgenv().SelectedFruit, getgenv().FruitWeight, nil)
-        else
-            Rayfield:Notify({
-                Title = "Error",
-                Content = "Please select a fruit and enter a valid weight.",
-                Duration = 3
-            })
-        end
-    end
-})
-
--- Make Age input visible when switching back to Pets tab
-PetsTab:OnTabOpened(function()
-    AgeInput:SetVisibility(true)
-end)
-
--- Refresh item lists periodically
-local function refreshItems()
-    local newPets, newFruits = getBackpackItems()
-    PetDropdown:Set(newPets)
-    FruitDropdown:Set(newFruits)
 end
 
-PetsTab:CreateButton({
-    Name = "Refresh Items",
-    Callback = refreshItems
-})
+-- Create Input Field
+local function createInput(parent, name, placeholder, callback)
+    local InputFrame = Instance.new("Frame")
+    InputFrame.Size = UDim2.new(1, -10, 0, 30)
+    InputFrame.BackgroundTransparency = 1
+    InputFrame.Parent = parent
 
-FruitsTab:CreateButton({
-    Name = "Refresh Items",
-    Callback = refreshItems
-})
+    local Label = Instance.new("TextLabel")
+    Label.Size = UDim2.new(0.4, 0, 1, 0)
+    Label.Text = name
+    Label.TextColor3 = Color3.fromRGB(255, 255, 255)
+    Label.BackgroundTransparency = 1
+    Label.TextScaled = true
+    Label.Parent = InputFrame
 
--- Initial notification
-Rayfield:Notify({
+    local TextBox = Instance.new("TextBox")
+    TextBox.Size = UDim2.new(0.6, 0, 1, 0)
+    TextBox.Position = UDim2.new(0.4, 0, 0, 0)
+    TextBox.Text = ""
+    TextBox.PlaceholderText = placeholder
+    TextBox.TextColor3 = Color3.fromRGB(255, 255, 255)
+    TextBox.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+    TextBox.TextScaled = true
+    TextBox.Parent = InputFrame
+    TextBox.FocusLost:Connect(function()
+        callback(TextBox.Text)
+    end)
+
+    return InputFrame
+end
+
+-- Tab Management
+local currentTab = "Pets"
+local AgeInputFrame = nil
+local SelectedItem = nil
+local WeightValue = 10
+local AgeValue = 1
+
+-- Create Tabs
+local PetsTabButton = Instance.new("TextButton")
+PetsTabButton.Size = UDim2.new(1, 0, 0, 50)
+PetsTabButton.Position = UDim2.new(0, 0, 0, 0)
+PetsTabButton.Text = "Pets"
+PetsTabButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+PetsTabButton.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
+PetsTabButton.TextScaled = true
+PetsTabButton.Parent = TabFrame
+
+local FruitsTabButton = Instance.new("TextButton")
+FruitsTabButton.Size = UDim2.new(1, 0, 0, 50)
+FruitsTabButton.Position = UDim2.new(0, 0, 0, 50)
+FruitsTabButton.Text = "Fruits"
+FruitsTabButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+FruitsTabButton.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+FruitsTabButton.TextScaled = true
+FruitsTabButton.Parent = TabFrame
+
+-- Tab Content
+local function showPetsTab()
+    currentTab = "Pets"
+    PetsTabButton.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
+    FruitsTabButton.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+    clearContent()
+
+    local pets, _ = getBackpackItems()
+    createDropdown(ContentFrame, "Select Pet", pets, function(option)
+        SelectedItem = option
+    end)
+
+    WeightInputFrame = createInput(ContentFrame, "Weight (KG)", "Enter weight (e.g., 10.5)", function(text)
+        WeightValue = tonumber(text) or 10
+    end)
+    WeightInputFrame.Position = UDim2.new(0, 5, 0, 150)
+
+    AgeInputFrame = createInput(ContentFrame, "Age", "Enter age (e.g., 5)", function(text)
+        AgeValue = tonumber(text) or 1
+    end)
+    AgeInputFrame.Position = UDim2.new(0, 5, 0, 190)
+
+    local CloneButton = Instance.new("TextButton")
+    CloneButton.Size = UDim2.new(1, -10, 0, 30)
+    CloneButton.Position = UDim2.new(0, 5, 0, 230)
+    CloneButton.Text = "Clone Pet"
+    CloneButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+    CloneButton.BackgroundColor3 = Color3.fromRGB(0, 120, 0)
+    CloneButton.TextScaled = true
+    CloneButton.Parent = ContentFrame
+    CloneButton.MouseButton1Click:Connect(function()
+        if SelectedItem and WeightValue then
+            cloneItem(SelectedItem, WeightValue, AgeValue)
+        else
+            StarterGui:SetCore("SendNotification", {
+                Title = "Error",
+                Text = "Please select a pet and enter a valid weight.",
+                Duration = 3
+            })
+        end
+    end)
+end
+
+local function showFruitsTab()
+    currentTab = "Fruits"
+    PetsTabButton.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+    FruitsTabButton.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
+    clearContent()
+
+    local _, fruits = getBackpackItems()
+    createDropdown(ContentFrame, "Select Fruit", fruits, function(option)
+        SelectedItem = option
+    end)
+
+    WeightInputFrame = createInput(ContentFrame, "Weight (KG)", "Enter weight (e.g., 10.5)", function(text)
+        WeightValue = tonumber(text) or 10
+    end)
+    WeightInputFrame.Position = UDim2.new(0, 5, 0, 150)
+
+    local CloneButton = Instance.new("TextButton")
+    CloneButton.Size = UDim2.new(1, -10, 0, 30)
+    CloneButton.Position = UDim2.new(0, 5, 0, 190)
+    CloneButton.Text = "Clone Fruit"
+    CloneButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+    CloneButton.BackgroundColor3 = Color3.fromRGB(0, 120, 0)
+    CloneButton.TextScaled = true
+    CloneButton.Parent = ContentFrame
+    CloneButton.MouseButton1Click:Connect(function()
+        if SelectedItem and WeightValue then
+            cloneItem(SelectedItem, WeightValue, nil)
+        else
+            StarterGui:SetCore("SendNotification", {
+                Title = "Error",
+                Text = "Please select a fruit and enter a valid weight.",
+                Duration = 3
+            })
+        end
+    end)
+end
+
+-- Connect Tab Buttons
+PetsTabButton.MouseButton1Click:Connect(showPetsTab)
+FruitsTabButton.MouseButton1Click:Connect(showFruitsTab)
+
+-- Initial Setup
+showPetsTab()
+
+-- Refresh Button
+local RefreshButton = Instance.new("TextButton")
+RefreshButton.Size = UDim2.new(1, 0, 0, 30)
+RefreshButton.Position = UDim2.new(0, 0, 1, -30)
+RefreshButton.Text = "Refresh Items"
+RefreshButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+RefreshButton.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+RefreshButton.TextScaled = true
+RefreshButton.Parent = MainFrame
+RefreshButton.MouseButton1Click:Connect(function()
+    if currentTab == "Pets" then
+        showPetsTab()
+    else
+        showFruitsTab()
+    end
+end)
+
+-- Initial Notification
+StarterGui:SetCore("SendNotification", {
     Title = "Grow a Garden Cloner Loaded",
-    Content = "Select a pet or fruit to clone and customize its attributes!",
+    Text = "Select a pet or fruit to clone and customize its attributes!",
     Duration = 5
 })
