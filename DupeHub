@@ -2,19 +2,19 @@ local player = game.Players.LocalPlayer
 local backpack = player:WaitForChild("Backpack")
 local UIS = game:GetService("UserInputService")
 
+-- GUI Setup
 local gui = Instance.new("ScreenGui", player:WaitForChild("PlayerGui"))
 gui.Name = "BackpackDupeGUI"
 gui.ResetOnSpawn = false
 
 local frame = Instance.new("Frame", gui)
-frame.Size = UDim2.new(0, 260, 0, 290)
-frame.Position = UDim2.new(0.5, -130, 0.5, -145)
+frame.Size = UDim2.new(0, 280, 0, 320) -- увеличено
+frame.Position = UDim2.new(0.5, -140, 0.5, -160)
 frame.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
 frame.BorderSizePixel = 0
 
 local titleBar = Instance.new("TextLabel", frame)
 titleBar.Size = UDim2.new(1, 0, 0, 20)
-titleBar.Position = UDim2.new(0, 0, 0, 0)
 titleBar.Text = "📦 Backpack Dupe"
 titleBar.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
 titleBar.TextColor3 = Color3.new(1, 1, 1)
@@ -61,61 +61,6 @@ dropdown.Text = "Выберите предмет"
 dropdown.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
 dropdown.TextColor3 = Color3.new(1,1,1)
 
--- Поля ввода
-local weightLabel = Instance.new("TextLabel", frame)
-weightLabel.Size = UDim2.new(0, 100, 0, 20)
-weightLabel.Position = UDim2.new(0, 10, 0, 120)
-weightLabel.Text = "Вес:"
-weightLabel.TextColor3 = Color3.new(1, 1, 1)
-weightLabel.BackgroundTransparency = 1
-weightLabel.Font = Enum.Font.SourceSans
-weightLabel.TextSize = 14
-weightLabel.TextXAlignment = Enum.TextXAlignment.Left
-
-local weightInput = Instance.new("TextBox", frame)
-weightInput.Size = UDim2.new(0, 60, 0, 20)
-weightInput.Position = UDim2.new(0, 50, 0, 120)
-weightInput.PlaceholderText = "10"
-weightInput.Text = ""
-weightInput.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
-weightInput.TextColor3 = Color3.new(1,1,1)
-weightInput.ClearTextOnFocus = false
-
-local ageLabel = Instance.new("TextLabel", frame)
-ageLabel.Size = UDim2.new(0, 100, 0, 20)
-ageLabel.Position = UDim2.new(0, 130, 0, 120)
-ageLabel.Text = "Возраст:"
-ageLabel.TextColor3 = Color3.new(1, 1, 1)
-ageLabel.BackgroundTransparency = 1
-ageLabel.Font = Enum.Font.SourceSans
-ageLabel.TextSize = 14
-ageLabel.TextXAlignment = Enum.TextXAlignment.Left
-
-local ageInput = Instance.new("TextBox", frame)
-ageInput.Size = UDim2.new(0, 60, 0, 20)
-ageInput.Position = UDim2.new(0, 190, 0, 120)
-ageInput.PlaceholderText = "5"
-ageInput.Text = ""
-ageInput.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
-ageInput.TextColor3 = Color3.new(1,1,1)
-ageInput.ClearTextOnFocus = false
-
--- Кнопки
-local dupeOne = Instance.new("TextButton", frame)
-dupeOne.Size = UDim2.new(0.48, -5, 0, 30)
-dupeOne.Position = UDim2.new(0, 10, 0, 240)
-dupeOne.Text = "DUPE"
-dupeOne.BackgroundColor3 = Color3.fromRGB(0, 150, 0)
-dupeOne.TextColor3 = Color3.new(1,1,1)
-
-local dupeAll = Instance.new("TextButton", frame)
-dupeAll.Size = UDim2.new(0.48, -5, 0, 30)
-dupeAll.Position = UDim2.new(0.52, 0, 0, 240)
-dupeAll.Text = "DUPE ВСЁ"
-dupeAll.BackgroundColor3 = Color3.fromRGB(150, 0, 0)
-dupeAll.TextColor3 = Color3.new(1,1,1)
-
--- Список
 local dropdownFrame = Instance.new("ScrollingFrame", frame)
 dropdownFrame.Size = UDim2.new(1, -20, 0, 80)
 dropdownFrame.Position = UDim2.new(0, 10, 0, 65)
@@ -125,6 +70,61 @@ dropdownFrame.CanvasSize = UDim2.new(0, 0, 0, 0)
 dropdownFrame.ScrollBarThickness = 6
 dropdownFrame.BorderSizePixel = 0
 
+-- Поля "Вес" и "Возраст"
+local weightLabel = Instance.new("TextLabel", frame)
+weightLabel.Position = UDim2.new(0, 10, 0, 160)
+weightLabel.Size = UDim2.new(0, 60, 0, 20)
+weightLabel.Text = "Вес:"
+weightLabel.BackgroundTransparency = 1
+weightLabel.TextColor3 = Color3.new(1,1,1)
+weightLabel.Font = Enum.Font.SourceSans
+weightLabel.TextSize = 14
+weightLabel.TextXAlignment = Enum.TextXAlignment.Left
+
+local weightInput = Instance.new("TextBox", frame)
+weightInput.Position = UDim2.new(0, 70, 0, 160)
+weightInput.Size = UDim2.new(0, 60, 0, 20)
+weightInput.PlaceholderText = "10"
+weightInput.Text = ""
+weightInput.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+weightInput.TextColor3 = Color3.new(1,1,1)
+weightInput.ClearTextOnFocus = false
+
+local ageLabel = Instance.new("TextLabel", frame)
+ageLabel.Position = UDim2.new(0, 150, 0, 160)
+ageLabel.Size = UDim2.new(0, 60, 0, 20)
+ageLabel.Text = "Возраст:"
+ageLabel.BackgroundTransparency = 1
+ageLabel.TextColor3 = Color3.new(1,1,1)
+ageLabel.Font = Enum.Font.SourceSans
+ageLabel.TextSize = 14
+ageLabel.TextXAlignment = Enum.TextXAlignment.Left
+
+local ageInput = Instance.new("TextBox", frame)
+ageInput.Position = UDim2.new(0, 210, 0, 160)
+ageInput.Size = UDim2.new(0, 60, 0, 20)
+ageInput.PlaceholderText = "5"
+ageInput.Text = ""
+ageInput.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+ageInput.TextColor3 = Color3.new(1,1,1)
+ageInput.ClearTextOnFocus = false
+
+-- Кнопки
+local dupeOne = Instance.new("TextButton", frame)
+dupeOne.Size = UDim2.new(0.48, -5, 0, 30)
+dupeOne.Position = UDim2.new(0, 10, 0, 270)
+dupeOne.Text = "DUPE"
+dupeOne.BackgroundColor3 = Color3.fromRGB(0, 150, 0)
+dupeOne.TextColor3 = Color3.new(1,1,1)
+
+local dupeAll = Instance.new("TextButton", frame)
+dupeAll.Size = UDim2.new(0.48, -5, 0, 30)
+dupeAll.Position = UDim2.new(0.52, 0, 0, 270)
+dupeAll.Text = "DUPE ВСЁ"
+dupeAll.BackgroundColor3 = Color3.fromRGB(150, 0, 0)
+dupeAll.TextColor3 = Color3.new(1,1,1)
+
+-- Логика дюпа
 local selectedItem = nil
 local clonedInstances = {}
 
@@ -136,9 +136,7 @@ local blockedWords = {
 local function isAllowed(item)
     if item:IsA("ObjectValue") then return false end
     for _, word in ipairs(blockedWords) do
-        if string.find(item.Name:lower(), word:lower()) then
-            return false
-        end
+        if string.find(item.Name:lower(), word:lower()) then return false end
     end
     if clonedInstances[item] then return false end
     return true
@@ -156,13 +154,11 @@ local function updateItemList()
             btn.BackgroundColor3 = Color3.fromRGB(80, 80, 80)
             btn.TextColor3 = Color3.new(1,1,1)
             btn.TextScaled = true
-
             btn.MouseButton1Click:Connect(function()
                 selectedItem = item
                 dropdown.Text = "Выбран: " .. item.Name
                 dropdownFrame.Visible = false
             end)
-
             y += 24
         end
     end
@@ -171,31 +167,27 @@ end
 
 dropdown.MouseButton1Click:Connect(function()
     dropdownFrame.Visible = not dropdownFrame.Visible
-    if dropdownFrame.Visible then
-        updateItemList()
-    end
+    if dropdownFrame.Visible then updateItemList() end
 end)
 
 local function getWeight()
-    local value = tonumber(weightInput.Text)
-    return value or tonumber(weightInput.PlaceholderText)
+    return tonumber(weightInput.Text) or tonumber(weightInput.PlaceholderText)
 end
 
 local function getAge()
-    local value = tonumber(ageInput.Text)
-    return value or tonumber(ageInput.PlaceholderText)
+    return tonumber(ageInput.Text) or tonumber(ageInput.PlaceholderText)
 end
 
 dupeOne.MouseButton1Click:Connect(function()
     if selectedItem and isAllowed(selectedItem) then
         local clone = selectedItem:Clone()
-        clone.Parent = backpack
         clone:SetAttribute("Weight", getWeight())
         clone:SetAttribute("Age", getAge())
+        clone.Parent = backpack
         clonedInstances[selectedItem] = true
         updateItemList()
     else
-        warn("Сначала выбери допустимый предмет.")
+        warn("Сначала выбери предмет.")
     end
 end)
 
@@ -204,9 +196,9 @@ dupeAll.MouseButton1Click:Connect(function()
     for _, item in pairs(backpack:GetChildren()) do
         if isAllowed(item) then
             local clone = item:Clone()
-            clone.Parent = backpack
             clone:SetAttribute("Weight", getWeight())
             clone:SetAttribute("Age", getAge())
+            clone.Parent = backpack
             clonedInstances[item] = true
             count += 1
         end
