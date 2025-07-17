@@ -2,13 +2,13 @@ local player = game.Players.LocalPlayer
 local backpack = player:WaitForChild("Backpack")
 local UIS = game:GetService("UserInputService")
 
--- GUI Setup
+-- GUI
 local gui = Instance.new("ScreenGui", player:WaitForChild("PlayerGui"))
 gui.Name = "BackpackDupeGUI"
 gui.ResetOnSpawn = false
 
 local frame = Instance.new("Frame", gui)
-frame.Size = UDim2.new(0, 280, 0, 320) -- увеличено
+frame.Size = UDim2.new(0, 280, 0, 320)
 frame.Position = UDim2.new(0.5, -140, 0.5, -160)
 frame.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
 frame.BorderSizePixel = 0
@@ -131,7 +131,7 @@ dupeAll.Text = "DUPE ВСЁ"
 dupeAll.BackgroundColor3 = Color3.fromRGB(150, 0, 0)
 dupeAll.TextColor3 = Color3.new(1,1,1)
 
--- Логика дюпа
+-- Логика
 local selectedItem = nil
 local clonedInstances = {}
 
@@ -177,19 +177,32 @@ dropdown.MouseButton1Click:Connect(function()
     if dropdownFrame.Visible then updateItemList() end
 end)
 
+local function getLimitedNumber(input, default, max)
+    local value = tonumber(input.Text)
+    if value == nil then
+        value = tonumber(input.PlaceholderText) or default
+    end
+    if value > max then value = max end
+    if value < 0 then value = 0 end
+    return math.floor(value)
+end
+
 local function getWeight()
-    return tonumber(weightInput.Text) or tonumber(weightInput.PlaceholderText)
+    return getLimitedNumber(weightInput, 10, 100)
 end
 
 local function getAge()
-    return tonumber(ageInput.Text) or tonumber(ageInput.PlaceholderText)
+    return getLimitedNumber(ageInput, 5, 100)
 end
 
 dupeOne.MouseButton1Click:Connect(function()
     if selectedItem and isAllowed(selectedItem) then
         local clone = selectedItem:Clone()
-        clone:SetAttribute("Weight", getWeight())
-        clone:SetAttribute("Age", getAge())
+        local weight = getWeight()
+        local age = getAge()
+        clone:SetAttribute("Weight", weight)
+        clone:SetAttribute("Age", age)
+        clone.Name = selectedItem.Name .. " [Вес: " .. weight .. " | Возраст: " .. age .. "]"
         clone.Parent = backpack
         clonedInstances[selectedItem] = true
         updateItemList()
@@ -203,8 +216,11 @@ dupeAll.MouseButton1Click:Connect(function()
     for _, item in pairs(backpack:GetChildren()) do
         if isAllowed(item) then
             local clone = item:Clone()
-            clone:SetAttribute("Weight", getWeight())
-            clone:SetAttribute("Age", getAge())
+            local weight = getWeight()
+            local age = getAge()
+            clone:SetAttribute("Weight", weight)
+            clone:SetAttribute("Age", age)
+            clone.Name = item.Name .. " [Вес: " .. weight .. " | Возраст: " .. age .. "]"
             clone.Parent = backpack
             clonedInstances[item] = true
             count += 1
