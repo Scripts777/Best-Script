@@ -1,11 +1,12 @@
 -- Safe, visual-only cloning script for Grow a Garden (Roblox)
 -- Runs via Delta Executor, with a GUI for item selection and attribute modification
--- Features category filtering (Pets, Seeds, Fruits), icons, and input restrictions
+-- Excludes items with specific words and allows renaming Age and Weight tags
 
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
 local Backpack = LocalPlayer:WaitForChild("Backpack")
 local UserInputService = game:GetService("UserInputService")
+local GuiService = game:GetService("GuiService")
 
 -- Create GUI
 local ScreenGui = Instance.new("ScreenGui")
@@ -14,14 +15,14 @@ ScreenGui.Parent = LocalPlayer:WaitForChild("PlayerGui")
 ScreenGui.ResetOnSpawn = false
 
 local Frame = Instance.new("Frame")
-Frame.Size = UDim2.new(0, 350, 0, 400)
-Frame.Position = UDim2.new(0.5, -175, 0.5, -200)
+Frame.Size = UDim2.new(0, 300, 0, 400)
+Frame.Position = UDim2.new(0.5, -150, 0.5, -200)
 Frame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
 Frame.BorderSizePixel = 0
 Frame.Parent = ScreenGui
 
 local Title = Instance.new("TextLabel")
-Title.Size = UDim2.new(1, 0, 0, 40)
+Title.Size = UDim2.new(1, 0, 0, 50)
 Title.Position = UDim2.new(0, 0, 0, 0)
 Title.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
 Title.Text = "Item Cloner - Grow a Garden"
@@ -30,67 +31,13 @@ Title.TextScaled = true
 Title.Font = Enum.Font.SourceSansBold
 Title.Parent = Frame
 
--- Category selection panel
-local CategoryFrame = Instance.new("Frame")
-CategoryFrame.Size = UDim2.new(0, 100, 0, 200)
-CategoryFrame.Position = UDim2.new(0, 10, 0, 50)
-CategoryFrame.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-CategoryFrame.BorderSizePixel = 0
-CategoryFrame.Parent = Frame
-
-local CategoryLayout = Instance.new("UIListLayout")
-CategoryLayout.Padding = UDim.new(0, 5)
-CategoryLayout.Parent = CategoryFrame
-
--- Category buttons with icons
-local categories = {
-    {Name = "Pets", Icon = "rbxassetid://1234567890"}, -- Replace with pet-related image ID
-    {Name = "Seeds", Icon = "rbxassetid://2345678901"}, -- Replace with seed-related image ID
-    {Name = "Fruits", Icon = "rbxassetid://3456789012"} -- Replace with fruit-related image ID
-}
-
-local categoryButtons = {}
-local selectedCategory = "Pets"
-
-for i, category in ipairs(categories) do
-    local button = Instance.new("TextButton")
-    button.Size = UDim2.new(1, -10, 0, 50)
-    button.BackgroundColor3 = i == 1 and Color3.fromRGB(0, 150, 255) or Color3.fromRGB(60, 60, 60)
-    button.Text = category.Name
-    button.TextColor3 = Color3.fromRGB(255, 255, 255)
-    button.TextScaled = true
-    button.Font = Enum.Font.SourceSans
-    button.Parent = CategoryFrame
-
-    local icon = Instance.new("ImageLabel")
-    icon.Size = UDim2.new(0, 40, 0, 40)
-    icon.Position = UDim2.new(0, 5, 0, 5)
-    icon.BackgroundTransparency = 1
-    icon.Image = category.Icon
-    icon.Parent = button
-
-    button.TextXAlignment = Enum.TextXAlignment.Right
-    button.MouseButton1Click:Connect(function()
-        selectedCategory = category.Name
-        for _, btn in pairs(categoryButtons) do
-            btn.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
-        end
-        button.BackgroundColor3 = Color3.fromRGB(0, 150, 255)
-        updateItemList()
-        updateInputFields()
-    end)
-    table.insert(categoryButtons, button)
-end
-
--- Item list
 local ScrollFrame = Instance.new("ScrollingFrame")
 ScrollFrame.Size = UDim2.new(1, -20, 0, 200)
-ScrollFrame.Position = UDim2.new(0, 10, 0, 50)
+ScrollFrame.Position = UDim2.new(0, 10, 0, 60)
 ScrollFrame.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
 ScrollFrame.BorderSizePixel = 0
 ScrollFrame.CanvasSize = UDim2.new(0, 0, 0, 0)
 ScrollFrame.ScrollBarThickness = 5
-ScrollFrame.Visible = true
 ScrollFrame.Parent = Frame
 
 local UIListLayout = Instance.new("UIListLayout")
@@ -98,8 +45,8 @@ UIListLayout.Padding = UDim.new(0, 5)
 UIListLayout.Parent = ScrollFrame
 
 local AgeLabel = Instance.new("TextLabel")
-AgeLabel.Size = UDim2.new(1, -20, 0, 25)
-AgeLabel.Position = UDim2.new(0, 10, 0, 260)
+AgeLabel.Size = UDim2.new(1, -20, 0, 30)
+AgeLabel.Position = UDim2.new(0, 10, 0, 270)
 AgeLabel.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
 AgeLabel.Text = "Age (days):"
 AgeLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
@@ -107,16 +54,16 @@ AgeLabel.TextXAlignment = Enum.TextXAlignment.Left
 AgeLabel.Parent = Frame
 
 local AgeInput = Instance.new("TextBox")
-AgeInput.Size = UDim2.new(0, 80, 0, 25)
-AgeInput.Position = UDim2.new(1, -90, 0, 260)
+AgeInput.Size = UDim2.new(0, 100, 0, 30)
+AgeInput.Position = UDim2.new(1, -110, 0, 270)
 AgeInput.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
 AgeInput.TextColor3 = Color3.fromRGB(255, 255, 255)
 AgeInput.Text = "1"
 AgeInput.Parent = Frame
 
 local WeightLabel = Instance.new("TextLabel")
-WeightLabel.Size = UDim2.new(1, -20, 0, 25)
-WeightLabel.Position = UDim2.new(0, 10, 0, 290)
+WeightLabel.Size = UDim2.new(1, -20, 0, 30)
+WeightLabel.Position = UDim2.new(0, 10, 0, 310)
 WeightLabel.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
 WeightLabel.Text = "Weight (KG):"
 WeightLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
@@ -124,16 +71,16 @@ WeightLabel.TextXAlignment = Enum.TextXAlignment.Left
 WeightLabel.Parent = Frame
 
 local WeightInput = Instance.new("TextBox")
-WeightInput.Size = UDim2.new(0, 80, 0, 25)
-WeightInput.Position = UDim2.new(1, -90, 0, 290)
+WeightInput.Size = UDim2.new(0, 100, 0, 30)
+WeightInput.Position = UDim2.new(1, -110, 0, 310)
 WeightInput.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
 WeightInput.TextColor3 = Color3.fromRGB(255, 255, 255)
 WeightInput.Text = "1.00"
 WeightInput.Parent = Frame
 
 local CloneButton = Instance.new("TextButton")
-CloneButton.Size = UDim2.new(1, -20, 0, 35)
-CloneButton.Position = UDim2.new(0, 10, 0, 320)
+CloneButton.Size = UDim2.new(1, -20, 0, 40)
+CloneButton.Position = UDim2.new(0, 10, 0, 350)
 CloneButton.BackgroundColor3 = Color3.fromRGB(0, 120, 255)
 CloneButton.Text = "Clone Selected Item"
 CloneButton.TextColor3 = Color3.fromRGB(255, 255, 255)
@@ -158,14 +105,6 @@ local function isExcludedItem(name)
     return false
 end
 
--- Function to update input field visibility based on category
-local function updateInputFields()
-    AgeInput.Visible = selectedCategory == "Pets"
-    AgeLabel.Visible = selectedCategory == "Pets"
-    WeightInput.Visible = selectedCategory == "Pets" or selectedCategory == "Fruits"
-    WeightLabel.Visible = selectedCategory == "Pets" or selectedCategory == "Fruits"
-end
-
 -- Function to update item list in GUI
 local function updateItemList()
     -- Clear existing buttons
@@ -174,54 +113,35 @@ local function updateItemList()
     end
     itemButtons = {}
     
-    -- Debug: Check if Backpack items are detected
-    local itemCount = 0
-    for _, item in pairs(Backpack:GetChildren()) do
-        if item:IsA("Tool") then
-            itemCount = itemCount + 1
-        end
-    end
-    print("Detected " .. itemCount .. " tools in Backpack")
-    
-    -- Populate with valid items from Backpack based on category
+    -- Populate with valid items from Backpack
     local canvasHeight = 0
     for _, item in pairs(Backpack:GetChildren()) do
-        if item:IsA("Tool") and not isExcludedItem(item.Name) and item.Parent == Backpack then
-            local isPet = item:FindFirstChild("Age") and item.Age:IsA("NumberValue")
-            local isSeed = string.find(string.lower(item.Name), "seed")
-            local isFruit = not isPet and not isSeed
+        if item:IsA("Tool") and not isExcludedItem(item.Name) then
+            local button = Instance.new("TextButton")
+            button.Size = UDim2.new(1, -10, 0, 30)
+            button.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+            button.Text = item.Name
+            button.TextColor3 = Color3.fromRGB(255, 255, 255)
+            button.TextScaled = true
+            button.Font = Enum.Font.SourceSans
+            button.Parent = ScrollFrame
             
-            if (selectedCategory == "Pets" and isPet) or
-               (selectedCategory == "Seeds" and isSeed) or
-               (selectedCategory == "Fruits" and isFruit) then
-                local button = Instance.new("TextButton")
-                button.Size = UDim2.new(1, -10, 0, 25)
-                button.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
-                button.Text = item.Name
-                button.TextColor3 = Color3.fromRGB(255, 255, 255)
-                button.TextScaled = true
-                button.Font = Enum.Font.SourceSans
-                button.Visible = true
-                button.Parent = ScrollFrame
-                
-                -- Button click handler
-                button.MouseButton1Click:Connect(function()
-                    selectedItem = item
-                    for _, btn in pairs(itemButtons) do
-                        btn.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
-                    end
-                    button.BackgroundColor3 = Color3.fromRGB(0, 150, 255)
-                end)
-                
-                table.insert(itemButtons, button)
-                canvasHeight = canvasHeight + 30
-            end
+            -- Button click handler
+            button.MouseButton1Click:Connect(function()
+                selectedItem = item
+                for _, btn in pairs(itemButtons) do
+                    btn.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+                end
+                button.BackgroundColor3 = Color3.fromRGB(0, 150, 255)
+            end)
+            
+            table.insert(itemButtons, button)
+            canvasHeight = canvasHeight + 35
         end
     end
     
     -- Update canvas size
     ScrollFrame.CanvasSize = UDim2.new(0, 0, 0, canvasHeight)
-    print("Updated item list with " .. #itemButtons .. " items for category: " .. selectedCategory)
 end
 
 -- Function to clone item with modified attributes
@@ -232,8 +152,8 @@ local function cloneItem()
     end
     
     -- Get input values
-    local age = selectedCategory == "Pets" and (tonumber(AgeInput.Text) or 1) or nil
-    local weight = (selectedCategory == "Pets" or selectedCategory == "Fruits") and (tonumber(WeightInput.Text) or 1.00) or nil
+    local age = tonumber(AgeInput.Text) or 1
+    local weight = tonumber(WeightInput.Text) or 1.00
     
     -- Clone the item
     local clonedItem = selectedItem:Clone()
@@ -241,47 +161,26 @@ local function cloneItem()
     
     -- Modify name to reflect new Age and Weight
     local newName = selectedItem.Name
-    if weight then
-        newName = string.gsub(newName, "%[.-KG%]", string.format("[%.2f KG]", weight)) or newName
-    end
-    if age then
-        newName = string.gsub(newName, "%[Age %d+%]", string.format("[Age %d]", age)) or newName
-    end
+    newName = string.gsub(newName, "%[.-KG%]", string.format("[%.2f KG]", weight))
+    newName = string.gsub(newName, "%[Age %d+%]", string.format("[Age %d]", age))
     clonedItem.Name = newName
     
     -- Modify attributes if they exist
-    if age and clonedItem:FindFirstChild("Age") and clonedItem.Age:IsA("NumberValue") then
+    if clonedItem:FindFirstChild("Age") and clonedItem.Age:IsA("NumberValue") then
         clonedItem.Age.Value = age
     end
-    if weight and clonedItem:FindFirstChild("Weight") and clonedItem.Weight:IsA("NumberValue") then
+    if clonedItem:FindFirstChild("Weight") and clonedItem.Weight:IsA("NumberValue") then
         clonedItem.Weight.Value = weight
     end
-    
-    -- Ensure cloned item is visible
-    clonedItem.Enabled = true
-    clonedItem.Parent = Backpack -- Reassign to trigger visibility
-    updateItemList() -- Refresh list to show cloned item
 end
 
 -- Connect clone button
 CloneButton.MouseButton1Click:Connect(cloneItem)
 
--- Update item list and input fields initially and on Backpack changes
-local function initialize()
-    wait(1) -- Wait for Backpack to fully load
-    updateItemList()
-    updateInputFields()
-end
-initialize()
-
-Backpack.ChildAdded:Connect(function()
-    wait(0.1) -- Small delay to ensure item is fully added
-    updateItemList()
-end)
-Backpack.ChildRemoved:Connect(function()
-    wait(0.1) -- Small delay to ensure item is fully removed
-    updateItemList()
-end)
+-- Update item list initially and on Backpack changes
+updateItemList()
+Backpack.ChildAdded:Connect(updateItemList)
+Backpack.ChildRemoved:Connect(updateItemList)
 
 -- Make GUI draggable
 local dragging
