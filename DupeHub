@@ -1,12 +1,14 @@
--- Backpack Clone Script (улучшенная версия)
+-- 🧠 Полная улучшенная версия Backpack Cloner
 local player = game.Players.LocalPlayer
 local backpack = player:WaitForChild("Backpack")
 local UIS = game:GetService("UserInputService")
 
+-- GUI
 local gui = Instance.new("ScreenGui", player:WaitForChild("PlayerGui"))
 gui.Name = "BackpackDupeGUI"
 gui.ResetOnSpawn = false
 
+-- Кнопка-тогглер
 local toggleButton = Instance.new("ImageButton", gui)
 toggleButton.Size = UDim2.new(0, 40, 0, 40)
 toggleButton.Position = UDim2.new(0, 10, 0.5, -20)
@@ -37,6 +39,7 @@ UIS.InputChanged:Connect(function(input)
 	end
 end)
 
+-- Основной фрейм
 local frame = Instance.new("Frame", gui)
 frame.Size = UDim2.new(0, 280, 0, 320)
 frame.Position = UDim2.new(0.5, -140, 0.5, -160)
@@ -57,6 +60,7 @@ titleBar.Font = Enum.Font.SourceSansBold
 titleBar.TextSize = 14
 titleBar.TextXAlignment = Enum.TextXAlignment.Left
 
+-- Dropdown
 local dropdown = Instance.new("TextButton", frame)
 dropdown.Size = UDim2.new(1, -20, 0, 30)
 dropdown.Position = UDim2.new(0, 10, 0, 30)
@@ -73,6 +77,17 @@ dropdownFrame.CanvasSize = UDim2.new(0, 0, 0, 0)
 dropdownFrame.ScrollBarThickness = 6
 dropdownFrame.BorderSizePixel = 0
 
+-- Labels
+local weightLabel = Instance.new("TextLabel", frame)
+weightLabel.Position = UDim2.new(0, 10, 0, 160)
+weightLabel.Size = UDim2.new(0, 60, 0, 20)
+weightLabel.Text = "Вес:"
+weightLabel.BackgroundTransparency = 1
+weightLabel.TextColor3 = Color3.new(1,1,1)
+weightLabel.Font = Enum.Font.SourceSans
+weightLabel.TextSize = 14
+weightLabel.TextXAlignment = Enum.TextXAlignment.Left
+
 local weightInput = Instance.new("TextBox", frame)
 weightInput.Position = UDim2.new(0, 70, 0, 160)
 weightInput.Size = UDim2.new(0, 60, 0, 20)
@@ -80,6 +95,17 @@ weightInput.PlaceholderText = "10"
 weightInput.Text = ""
 weightInput.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
 weightInput.TextColor3 = Color3.new(1,1,1)
+weightInput.ClearTextOnFocus = false
+
+local ageLabel = Instance.new("TextLabel", frame)
+ageLabel.Position = UDim2.new(0, 150, 0, 160)
+ageLabel.Size = UDim2.new(0, 60, 0, 20)
+ageLabel.Text = "Возраст:"
+ageLabel.BackgroundTransparency = 1
+ageLabel.TextColor3 = Color3.new(1,1,1)
+ageLabel.Font = Enum.Font.SourceSans
+ageLabel.TextSize = 14
+ageLabel.TextXAlignment = Enum.TextXAlignment.Left
 
 local ageInput = Instance.new("TextBox", frame)
 ageInput.Position = UDim2.new(0, 210, 0, 160)
@@ -88,7 +114,9 @@ ageInput.PlaceholderText = "5"
 ageInput.Text = ""
 ageInput.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
 ageInput.TextColor3 = Color3.new(1,1,1)
+ageInput.ClearTextOnFocus = false
 
+-- Buttons
 local dupeOne = Instance.new("TextButton", frame)
 dupeOne.Size = UDim2.new(0.48, -5, 0, 30)
 dupeOne.Position = UDim2.new(0, 10, 0, 270)
@@ -96,7 +124,29 @@ dupeOne.Text = "DUPE"
 dupeOne.BackgroundColor3 = Color3.fromRGB(0, 150, 0)
 dupeOne.TextColor3 = Color3.new(1,1,1)
 
+local dupeAll = Instance.new("TextButton", frame)
+dupeAll.Size = UDim2.new(0.48, -5, 0, 30)
+dupeAll.Position = UDim2.new(0.52, 0, 0, 270)
+dupeAll.Text = "DUPE ВСЁ"
+dupeAll.BackgroundColor3 = Color3.fromRGB(150, 0, 0)
+dupeAll.TextColor3 = Color3.new(1,1,1)
+
+-- Logic
 local selectedItem = nil
+local clonedInstances = {}
+
+local blockedWords = {
+	"Favorite", "Trowel", "Shovel", "Spray", "Recall", "Sprinkler", "Glass", "Egg"
+}
+
+local function isAllowed(item)
+	if item:IsA("ObjectValue") then return false end
+	for _, word in ipairs(blockedWords) do
+		if string.find(item.Name:lower(), word:lower()) then return false end
+	end
+	if clonedInstances[item] then return false end
+	return true
+end
 
 local function cleanName(name)
 	return name:gsub("%s*%[.-%s*KG%]", ""):gsub("%s*%[Age%s*%d+%]", "")
@@ -129,7 +179,7 @@ local function scaleAndAnimate(tool, weight, age)
 	end
 end
 
-local function dupe(item)
+local function cloneItem(item)
 	local weight = getNumber(weightInput, 10, 0.1, 100, false)
 	local age = getNumber(ageInput, 5, 1, 100, true)
 	local tool = Instance.new("Tool")
@@ -150,8 +200,51 @@ local function dupe(item)
 	handle.Parent = tool
 
 	tool.Parent = backpack
+	clonedInstances[item] = true
 end
 
+local function updateItemList()
+	dropdownFrame:ClearAllChildren()
+	local y = 0
+	for _, item in pairs(backpack:GetChildren()) do
+		if isAllowed(item) then
+			local btn = Instance.new("TextButton", dropdownFrame)
+			btn.Size = UDim2.new(1, 0, 0, 24)
+			btn.Position = UDim2.new(0, 0, 0, y)
+			btn.Text = item.Name
+			btn.BackgroundColor3 = Color3.fromRGB(80, 80, 80)
+			btn.TextColor3 = Color3.new(1,1,1)
+			btn.TextScaled = true
+			btn.MouseButton1Click:Connect(function()
+				selectedItem = item
+				dropdown.Text = "Выбран: " .. item.Name
+				dropdownFrame.Visible = false
+			end)
+			y += 24
+		end
+	end
+	dropdownFrame.CanvasSize = UDim2.new(0, 0, 0, y)
+end
+
+dropdown.MouseButton1Click:Connect(function()
+	dropdownFrame.Visible = not dropdownFrame.Visible
+	if dropdownFrame.Visible then updateItemList() end
+end)
+
 dupeOne.MouseButton1Click:Connect(function()
-	if selectedItem then dupe(selectedItem) end
+	if selectedItem and isAllowed(selectedItem) then
+		cloneItem(selectedItem)
+		updateItemList()
+	else
+		warn("Сначала выбери предмет.")
+	end
+end)
+
+dupeAll.MouseButton1Click:Connect(function()
+	for _, item in pairs(backpack:GetChildren()) do
+		if isAllowed(item) then
+			cloneItem(item)
+		end
+	end
+	updateItemList()
 end)
