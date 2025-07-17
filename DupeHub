@@ -1,13 +1,12 @@
+-- Backpack Clone Script (улучшенная версия)
 local player = game.Players.LocalPlayer
 local backpack = player:WaitForChild("Backpack")
 local UIS = game:GetService("UserInputService")
 
--- GUI
 local gui = Instance.new("ScreenGui", player:WaitForChild("PlayerGui"))
 gui.Name = "BackpackDupeGUI"
 gui.ResetOnSpawn = false
 
--- Toggle Button
 local toggleButton = Instance.new("ImageButton", gui)
 toggleButton.Size = UDim2.new(0, 40, 0, 40)
 toggleButton.Position = UDim2.new(0, 10, 0.5, -20)
@@ -15,11 +14,7 @@ toggleButton.BackgroundColor3 = Color3.fromRGB(100, 100, 100)
 toggleButton.Image = "rbxassetid://3926305904"
 toggleButton.ImageRectOffset = Vector2.new(324, 364)
 toggleButton.ImageRectSize = Vector2.new(36, 36)
-toggleButton.BackgroundTransparency = 0
 toggleButton.BorderSizePixel = 0
-toggleButton.ClipsDescendants = true
-toggleButton.ZIndex = 10
-toggleButton.AutoButtonColor = true
 toggleButton.AnchorPoint = Vector2.new(0, 0.5)
 toggleButton:SetAttribute("Dragging", false)
 toggleButton:SetAttribute("DragOffset", Vector2.new())
@@ -30,13 +25,11 @@ toggleButton.InputBegan:Connect(function(input)
 		toggleButton:SetAttribute("DragOffset", Vector2.new(input.Position.X - toggleButton.AbsolutePosition.X, input.Position.Y - toggleButton.AbsolutePosition.Y))
 	end
 end)
-
 toggleButton.InputEnded:Connect(function(input)
 	if input.UserInputType == Enum.UserInputType.MouseButton1 then
 		toggleButton:SetAttribute("Dragging", false)
 	end
 end)
-
 UIS.InputChanged:Connect(function(input)
 	if toggleButton:GetAttribute("Dragging") and input.UserInputType == Enum.UserInputType.MouseMovement then
 		local offset = toggleButton:GetAttribute("DragOffset")
@@ -44,7 +37,6 @@ UIS.InputChanged:Connect(function(input)
 	end
 end)
 
--- Главное окно
 local frame = Instance.new("Frame", gui)
 frame.Size = UDim2.new(0, 280, 0, 320)
 frame.Position = UDim2.new(0.5, -140, 0.5, -160)
@@ -65,38 +57,6 @@ titleBar.Font = Enum.Font.SourceSansBold
 titleBar.TextSize = 14
 titleBar.TextXAlignment = Enum.TextXAlignment.Left
 
--- Перетаскивание GUI
-local dragging, dragInput, dragStart, startPos
-titleBar.InputBegan:Connect(function(input)
-	if input.UserInputType == Enum.UserInputType.MouseButton1 then
-		dragging = true
-		dragStart = input.Position
-		startPos = frame.Position
-		input.Changed:Connect(function()
-			if input.UserInputState == Enum.UserInputState.End then
-				dragging = false
-			end
-		end)
-	end
-end)
-
-titleBar.InputChanged:Connect(function(input)
-	if input.UserInputType == Enum.UserInputType.MouseMovement then
-		dragInput = input
-	end
-end)
-
-UIS.InputChanged:Connect(function(input)
-	if input == dragInput and dragging then
-		local delta = input.Position - dragStart
-		frame.Position = UDim2.new(
-			startPos.X.Scale, startPos.X.Offset + delta.X,
-			startPos.Y.Scale, startPos.Y.Offset + delta.Y
-		)
-	end
-end)
-
--- Выпадающий список
 local dropdown = Instance.new("TextButton", frame)
 dropdown.Size = UDim2.new(1, -20, 0, 30)
 dropdown.Position = UDim2.new(0, 10, 0, 30)
@@ -113,17 +73,6 @@ dropdownFrame.CanvasSize = UDim2.new(0, 0, 0, 0)
 dropdownFrame.ScrollBarThickness = 6
 dropdownFrame.BorderSizePixel = 0
 
--- Поля
-local weightLabel = Instance.new("TextLabel", frame)
-weightLabel.Position = UDim2.new(0, 10, 0, 160)
-weightLabel.Size = UDim2.new(0, 60, 0, 20)
-weightLabel.Text = "Вес:"
-weightLabel.BackgroundTransparency = 1
-weightLabel.TextColor3 = Color3.new(1,1,1)
-weightLabel.Font = Enum.Font.SourceSans
-weightLabel.TextSize = 14
-weightLabel.TextXAlignment = Enum.TextXAlignment.Left
-
 local weightInput = Instance.new("TextBox", frame)
 weightInput.Position = UDim2.new(0, 70, 0, 160)
 weightInput.Size = UDim2.new(0, 60, 0, 20)
@@ -131,17 +80,6 @@ weightInput.PlaceholderText = "10"
 weightInput.Text = ""
 weightInput.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
 weightInput.TextColor3 = Color3.new(1,1,1)
-weightInput.ClearTextOnFocus = false
-
-local ageLabel = Instance.new("TextLabel", frame)
-ageLabel.Position = UDim2.new(0, 150, 0, 160)
-ageLabel.Size = UDim2.new(0, 60, 0, 20)
-ageLabel.Text = "Возраст:"
-ageLabel.BackgroundTransparency = 1
-ageLabel.TextColor3 = Color3.new(1,1,1)
-ageLabel.Font = Enum.Font.SourceSans
-ageLabel.TextSize = 14
-ageLabel.TextXAlignment = Enum.TextXAlignment.Left
 
 local ageInput = Instance.new("TextBox", frame)
 ageInput.Position = UDim2.new(0, 210, 0, 160)
@@ -150,9 +88,7 @@ ageInput.PlaceholderText = "5"
 ageInput.Text = ""
 ageInput.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
 ageInput.TextColor3 = Color3.new(1,1,1)
-ageInput.ClearTextOnFocus = false
 
--- Кнопки
 local dupeOne = Instance.new("TextButton", frame)
 dupeOne.Size = UDim2.new(0.48, -5, 0, 30)
 dupeOne.Position = UDim2.new(0, 10, 0, 270)
@@ -160,156 +96,62 @@ dupeOne.Text = "DUPE"
 dupeOne.BackgroundColor3 = Color3.fromRGB(0, 150, 0)
 dupeOne.TextColor3 = Color3.new(1,1,1)
 
-local dupeAll = Instance.new("TextButton", frame)
-dupeAll.Size = UDim2.new(0.48, -5, 0, 30)
-dupeAll.Position = UDim2.new(0.52, 0, 0, 270)
-dupeAll.Text = "DUPE ВСЁ"
-dupeAll.BackgroundColor3 = Color3.fromRGB(150, 0, 0)
-dupeAll.TextColor3 = Color3.new(1,1,1)
-
--- Логика
 local selectedItem = nil
-local clonedInstances = {}
-
-local blockedWords = {
-    "Favorite", "Trowel", "Shovel", "Spray",
-    "Recall", "Sprinkler", "Glass", "Egg"
-}
-
-local function isAllowed(item)
-    if item:IsA("ObjectValue") then return false end
-    for _, word in ipairs(blockedWords) do
-        if string.find(item.Name:lower(), word:lower()) then return false end
-    end
-    if clonedInstances[item] then return false end
-    return true
-end
-
-local function updateItemList()
-    dropdownFrame:ClearAllChildren()
-    local y = 0
-    for _, item in pairs(backpack:GetChildren()) do
-        if isAllowed(item) then
-            local btn = Instance.new("TextButton", dropdownFrame)
-            btn.Size = UDim2.new(1, 0, 0, 24)
-            btn.Position = UDim2.new(0, 0, 0, y)
-            btn.Text = item.Name
-            btn.BackgroundColor3 = Color3.fromRGB(80, 80, 80)
-            btn.TextColor3 = Color3.new(1,1,1)
-            btn.TextScaled = true
-            btn.MouseButton1Click:Connect(function()
-                selectedItem = item
-                dropdown.Text = "Выбран: " .. item.Name
-                dropdownFrame.Visible = false
-            end)
-            y += 24
-        end
-    end
-    dropdownFrame.CanvasSize = UDim2.new(0, 0, 0, y)
-end
-
-dropdown.MouseButton1Click:Connect(function()
-    dropdownFrame.Visible = not dropdownFrame.Visible
-    if dropdownFrame.Visible then updateItemList() end
-end)
-
-local function getLimitedNumber(input, default, min, max, roundToDecimal)
-    local value = tonumber(input.Text)
-    if value == nil then
-        value = tonumber(input.PlaceholderText) or default
-    end
-    if value > max then value = max end
-    if value < min then value = min end
-    if roundToDecimal then
-        return math.floor(value * 100 + 0.5) / 100
-    else
-        return math.floor(value)
-    end
-end
-
-local function getWeight()
-    return getLimitedNumber(weightInput, 10, 0.1, 100, true)
-end
-
-local function getAge()
-    return getLimitedNumber(ageInput, 5, 1, 100, false)
-end
 
 local function cleanName(name)
-	return name
-		:gsub("%s*%[.-%s*KG%]", "")
-		:gsub("%s*%[Age%s*%d+%]", "")
+	return name:gsub("%s*%[.-%s*KG%]", ""):gsub("%s*%[Age%s*%d+%]", "")
 end
 
-local function scaleModelContents(tool, weight, age)
-	for _, descendant in pairs(tool:GetDescendants()) do
-		if descendant:IsA("BasePart") then
-			local baseSize = descendant.Size
-			local weightFactor = math.clamp(weight / 10, 0.1, 10)
-			local ageFactor = math.clamp(age / 10, 0.5, 2)
-			local finalScale = weightFactor * (1 / ageFactor)
-			descendant.Size = baseSize * finalScale
-		elseif descendant:IsA("SpecialMesh") then
-			local scale = descendant.Scale
-			local weightFactor = math.clamp(weight / 10, 0.1, 10)
-			local ageFactor = math.clamp(age / 10, 0.5, 2)
-			local finalScale = weightFactor * (1 / ageFactor)
-			descendant.Scale = scale * finalScale
-		end
-	end
+local function getNumber(input, default, min, max, round)
+	local value = tonumber(input.Text)
+	if not value then value = tonumber(input.PlaceholderText) or default end
+	value = math.clamp(value, min, max)
+	return round and math.floor(value) or math.floor(value * 100 + 0.5) / 100
 end
 
-local function animateCloneSize(tool)
-	for _, part in ipairs(tool:GetDescendants()) do
-		if part:IsA("BasePart") then
-			local originalSize = part.Size
-			part.Size = originalSize * 0.1
+local function scaleAndAnimate(tool, weight, age)
+	local scaleFactor = math.clamp((weight / 10) * (1 / age), 0.2, 3)
+	for _, d in pairs(tool:GetDescendants()) do
+		if d:IsA("BasePart") then
+			local originalSize = d.Size
+			d.Transparency = 0
+			d.Size = originalSize * scaleFactor * 0.1
 			task.spawn(function()
 				for i = 1, 10 do
-					part.Size = part.Size:Lerp(originalSize, 0.25)
+					d.Size = d.Size:Lerp(originalSize * scaleFactor, 0.25)
 					task.wait(0.02)
 				end
-				part.Size = originalSize
+				d.Size = originalSize * scaleFactor
 			end)
+		elseif d:IsA("SpecialMesh") then
+			d.Scale *= scaleFactor
 		end
 	end
 end
 
-local function dupeItem(item)
-	local clone = item:Clone()
-	local weight = getWeight()
-	local age = getAge()
-	clone:SetAttribute("Weight", nil)
-	clone:SetAttribute("Age", nil)
-	clone:SetAttribute("Weight", weight)
-	clone:SetAttribute("Age", age)
-	scaleModelContents(clone, weight, age)
-	animateCloneSize(clone)
-	local suffix = ""
-	if weight then suffix ..= string.format(" [%.2f KG]", weight) end
-	if age then suffix ..= string.format(" [Age %d]", age) end
-	clone.Name = cleanName(item.Name) .. suffix
-	clone.Parent = backpack
-	clonedInstances[item] = true
+local function dupe(item)
+	local weight = getNumber(weightInput, 10, 0.1, 100, false)
+	local age = getNumber(ageInput, 5, 1, 100, true)
+	local tool = Instance.new("Tool")
+	tool.Name = cleanName(item.Name) .. string.format(" [%.2f KG] [Age %d]", weight, age)
+	tool.RequiresHandle = false
+
+	local model = item:Clone()
+	model:SetAttribute("Weight", weight)
+	model:SetAttribute("Age", age)
+	scaleAndAnimate(model, weight, age)
+	model.Parent = tool
+
+	local handle = model:FindFirstChildWhichIsA("BasePart") or Instance.new("Part")
+	handle.Name = "Handle"
+	handle.Anchored = false
+	handle.CanCollide = false
+	handle.Transparency = 0
+	handle.Parent = tool
+
+	tool.Parent = backpack
 end
 
 dupeOne.MouseButton1Click:Connect(function()
-	if selectedItem and isAllowed(selectedItem) then
-		dupeItem(selectedItem)
-		updateItemList()
-	else
-		warn("Сначала выбери предмет.")
-	end
-end)
-
-dupeAll.MouseButton1Click:Connect(function()
-	local count = 0
-	for _, item in pairs(backpack:GetChildren()) do
-		if isAllowed(item) then
-			dupeItem(item)
-			count += 1
-		end
-	end
-	print("Клонов добавлено:", count)
-	updateItemList()
+	if selectedItem then dupe(selectedItem) end
 end)
