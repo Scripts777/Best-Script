@@ -1,6 +1,7 @@
 -- Grow a Garden Local Cloning Script for Delta Executor
 -- Safe, visual, local script with native Roblox GUI for cloning Backpack items
 -- Features: Pets/Fruits tabs, Age/Weight customization, dynamic Age field visibility
+-- Pets: Items with "Age" in name; Fruits: Items without "Age" in name
 
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
@@ -72,8 +73,7 @@ local function getBackpackItems()
     local fruits = {}
     for _, item in pairs(Backpack:GetChildren()) do
         if item:IsA("Tool") and not isExcludedItem(item.Name) then
-            local ageAttr = item:GetAttribute("Age")
-            if ageAttr then
+            if string.find(string.lower(item.Name), "age") then
                 table.insert(pets, item.Name)
             else
                 table.insert(fruits, item.Name)
@@ -91,17 +91,17 @@ local function cloneItem(itemName, weight, age)
             clonedItem.Parent = Backpack
             -- Set attributes
             clonedItem:SetAttribute("Weight", weight)
-            if age and clonedItem:GetAttribute("Age") then
+            if age and string.find(string.lower(itemName), "age") then
                 clonedItem:SetAttribute("Age", age)
             end
             -- Update name with [x.xx KG] [Age x] format
             local weightStr = string.format("[%.2f KG]", weight)
-            local ageStr = age and string.format("[Age %d]", age) or ""
+            local ageStr = age and string.find(string.lower(itemName), "age") and string.format("[Age %d]", age) or ""
             clonedItem.Name = item.Name .. " " .. weightStr .. " " .. ageStr
             -- Notify
             StarterGui:SetCore("SendNotification", {
                 Title = "Item Cloned",
-                Text = "Cloned " .. itemName .. " with Weight: " .. weight .. (age and " and Age: " .. age or ""),
+                Text = "Cloned " .. itemName .. " with Weight: " .. weight .. (age and string.find(string.lower(itemName), "age") and " and Age: " .. age or ""),
                 Duration = 3
             })
             break
