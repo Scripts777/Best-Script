@@ -8,12 +8,12 @@ gui.Name = "BackpackDupeGUI"
 gui.ResetOnSpawn = false
 
 local frame = Instance.new("Frame", gui)
-frame.Size = UDim2.new(0, 250, 0, 180)
-frame.Position = UDim2.new(0.5, -125, 0.5, -90) -- Центр экрана
+frame.Size = UDim2.new(0, 250, 0, 210)
+frame.Position = UDim2.new(0.5, -125, 0.5, -105)
 frame.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
 frame.BorderSizePixel = 0
 
--- Заголовок (область для перетаскивания)
+-- Заголовок
 local titleBar = Instance.new("TextLabel", frame)
 titleBar.Size = UDim2.new(1, 0, 0, 20)
 titleBar.Position = UDim2.new(0, 0, 0, 0)
@@ -26,7 +26,6 @@ titleBar.TextXAlignment = Enum.TextXAlignment.Left
 
 -- Перетаскивание вручную
 local dragging, dragInput, dragStart, startPos
-
 titleBar.InputBegan:Connect(function(input)
 	if input.UserInputType == Enum.UserInputType.MouseButton1 then
 		dragging = true
@@ -65,12 +64,19 @@ dropdown.Text = "Выберите предмет"
 dropdown.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
 dropdown.TextColor3 = Color3.new(1,1,1)
 
-local dupeButton = Instance.new("TextButton", frame)
-dupeButton.Size = UDim2.new(1, -20, 0, 30)
-dupeButton.Position = UDim2.new(0, 10, 0, 140)
-dupeButton.Text = "DUPE"
-dupeButton.BackgroundColor3 = Color3.fromRGB(0, 150, 0)
-dupeButton.TextColor3 = Color3.new(1,1,1)
+local dupeOne = Instance.new("TextButton", frame)
+dupeOne.Size = UDim2.new(0.48, -10, 0, 30)
+dupeOne.Position = UDim2.new(0, 10, 0, 170)
+dupeOne.Text = "DUPE"
+dupeOne.BackgroundColor3 = Color3.fromRGB(0, 150, 0)
+dupeOne.TextColor3 = Color3.new(1,1,1)
+
+local dupeAll = Instance.new("TextButton", frame)
+dupeAll.Size = UDim2.new(0.48, -10, 0, 30)
+dupeAll.Position = UDim2.new(0.52, 0, 0, 170)
+dupeAll.Text = "DUPE ВСЁ"
+dupeAll.BackgroundColor3 = Color3.fromRGB(150, 0, 0)
+dupeAll.TextColor3 = Color3.new(1,1,1)
 
 -- Список
 local dropdownFrame = Instance.new("ScrollingFrame", frame)
@@ -84,13 +90,13 @@ dropdownFrame.BorderSizePixel = 0
 
 local selectedItem = nil
 
--- Блокируем по словам:
+-- Слова-фильтры
 local blockedWords = {
     "Favorite", "Trowel", "Shovel", "Spray",
     "Recall", "Sprinkler", "Glass", "Egg"
 }
 
--- Проверка, можно ли показать
+-- Проверка
 local function isAllowed(item)
     if item:IsA("ObjectValue") then return false end
     for _, word in ipairs(blockedWords) do
@@ -127,7 +133,7 @@ local function updateItemList()
     dropdownFrame.CanvasSize = UDim2.new(0, 0, 0, y)
 end
 
--- Открыть / закрыть выпадающий список
+-- Открытие списка
 dropdown.MouseButton1Click:Connect(function()
     dropdownFrame.Visible = not dropdownFrame.Visible
     if dropdownFrame.Visible then
@@ -135,8 +141,8 @@ dropdown.MouseButton1Click:Connect(function()
     end
 end)
 
--- Кнопка дюпа
-dupeButton.MouseButton1Click:Connect(function()
+-- DUPE одного предмета
+dupeOne.MouseButton1Click:Connect(function()
     if selectedItem then
         local clone = selectedItem:Clone()
         clone.Parent = backpack
@@ -144,4 +150,17 @@ dupeButton.MouseButton1Click:Connect(function()
     else
         warn("Сначала выбери предмет.")
     end
+end)
+
+-- DUPE всех
+dupeAll.MouseButton1Click:Connect(function()
+    local count = 0
+    for _, item in pairs(backpack:GetChildren()) do
+        if isAllowed(item) then
+            local clone = item:Clone()
+            clone.Parent = backpack
+            count += 1
+        end
+    end
+    print("Добавлено клонов:", count)
 end)
