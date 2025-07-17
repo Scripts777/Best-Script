@@ -22,9 +22,10 @@ titleBar.Font = Enum.Font.SourceSansBold
 titleBar.TextSize = 14
 titleBar.TextXAlignment = Enum.TextXAlignment.Left
 
--- Перетаскивание GUI
+-- Перетаскивание GUI за любую часть
 local dragging, dragInput, dragStart, startPos
-titleBar.InputBegan:Connect(function(input)
+
+frame.InputBegan:Connect(function(input)
 	if input.UserInputType == Enum.UserInputType.MouseButton1 then
 		dragging = true
 		dragStart = input.Position
@@ -34,6 +35,12 @@ titleBar.InputBegan:Connect(function(input)
 				dragging = false
 			end
 		end)
+	end
+end)
+
+frame.InputChanged:Connect(function(input)
+	if input.UserInputType == Enum.UserInputType.MouseMovement then
+		dragInput = input
 	end
 end)
 
