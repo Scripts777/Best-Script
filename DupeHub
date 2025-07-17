@@ -2,6 +2,7 @@
 -- Safe, visual, local script with native Roblox GUI for cloning Backpack items
 -- Features: Pets/Fruits tabs, Age/Weight customization, dynamic Age field visibility
 -- Pets: Items with "Age" in name; Fruits: Items without "Age" in name
+-- Cloned items: Remove "Age" and "Weight" from name, update Age/Weight attributes in children
 
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
@@ -102,19 +103,33 @@ local function cloneItem(itemName, weight, age)
         if item:IsA("Tool") and item.Name == itemName then
             local clonedItem = item:Clone()
             clonedItem.Parent = Backpack
-            -- Set attributes
+            -- Remove "Age" and "Weight" from item name
+            local newName = item.Name
+            newName = string.gsub(string.lower(newName), "age", "")
+            newName = string.gsub(string.lower(newName), "weight", "")
+            newName = string.gsub(newName, "^%s*(.-)%s*$", "%1") -- Trim whitespace
+            -- Set attributes on the item itself
             clonedItem:SetAttribute("Weight", weight)
             if age and string.find(string.lower(itemName), "age") then
                 clonedItem:SetAttribute("Age", age)
             end
+            -- Update attributes in children
+            for _, child in pairs(clonedItem:GetChildren()) do
+                if child:GetAttribute("Weight") ~= nil then
+                    child:SetAttribute("Weight", weight)
+                end
+                if age and string.find(string.lower(itemName), "age") and child:GetAttribute("Age") ~= nil then
+                    child:SetAttribute("Age", age)
+                end
+            end
             -- Update name with [x.xx KG] [Age x] format
             local weightStr = string.format("[%.2f KG]", weight)
             local ageStr = age and string.find(string.lower(itemName), "age") and string.format("[Age %d]", age) or ""
-            clonedItem.Name = item.Name .. " " .. weightStr .. " " .. ageStr
+            clonedItem.Name = newName فارغة weightStr .. " " .. ageStr
             -- Notify
             StarterGui:SetCore("SendNotification", {
                 Title = "Item Cloned",
-                Text = "Cloned " .. itemName .. " with Weight: " .. weight .. (age and string.find(string.lower(itemName), "age") and " and Age: " .. age or ""),
+                Text = "Cloned " .. itemName .. " as '" .. clonedItem.Name .. "' with Weight: " .. weight .. (age and string.find(string.lower(itemName), "age") and " and Age: " .. age or ""),
                 Duration = 3
             })
             break
