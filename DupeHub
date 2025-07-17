@@ -2,7 +2,6 @@ local player = game.Players.LocalPlayer
 local backpack = player:WaitForChild("Backpack")
 local UIS = game:GetService("UserInputService")
 
--- GUI
 local gui = Instance.new("ScreenGui", player:WaitForChild("PlayerGui"))
 gui.Name = "BackpackDupeGUI"
 gui.ResetOnSpawn = false
@@ -13,7 +12,6 @@ frame.Position = UDim2.new(0.5, -125, 0.5, -115)
 frame.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
 frame.BorderSizePixel = 0
 
--- Заголовок
 local titleBar = Instance.new("TextLabel", frame)
 titleBar.Size = UDim2.new(1, 0, 0, 20)
 titleBar.Position = UDim2.new(0, 0, 0, 0)
@@ -24,14 +22,13 @@ titleBar.Font = Enum.Font.SourceSansBold
 titleBar.TextSize = 14
 titleBar.TextXAlignment = Enum.TextXAlignment.Left
 
--- Перетаскивание вручную
+-- Перетаскивание GUI
 local dragging, dragInput, dragStart, startPos
 titleBar.InputBegan:Connect(function(input)
 	if input.UserInputType == Enum.UserInputType.MouseButton1 then
 		dragging = true
 		dragStart = input.Position
 		startPos = frame.Position
-
 		input.Changed:Connect(function()
 			if input.UserInputState == Enum.UserInputState.End then
 				dragging = false
@@ -56,7 +53,7 @@ UIS.InputChanged:Connect(function(input)
 	end
 end)
 
--- Кнопки
+-- Элементы интерфейса
 local dropdown = Instance.new("TextButton", frame)
 dropdown.Size = UDim2.new(1, -20, 0, 30)
 dropdown.Position = UDim2.new(0, 10, 0, 30)
@@ -78,7 +75,6 @@ dupeAll.Text = "DUPE ВСЁ"
 dupeAll.BackgroundColor3 = Color3.fromRGB(150, 0, 0)
 dupeAll.TextColor3 = Color3.new(1,1,1)
 
--- Список
 local dropdownFrame = Instance.new("ScrollingFrame", frame)
 dropdownFrame.Size = UDim2.new(1, -20, 0, 80)
 dropdownFrame.Position = UDim2.new(0, 10, 0, 65)
@@ -89,23 +85,22 @@ dropdownFrame.ScrollBarThickness = 6
 dropdownFrame.BorderSizePixel = 0
 
 local selectedItem = nil
-local alreadyCloned = {}
+local clonedInstances = {}
 
--- Слова-фильтры
 local blockedWords = {
     "Favorite", "Trowel", "Shovel", "Spray",
     "Recall", "Sprinkler", "Glass", "Egg"
 }
 
--- Проверка
+-- Проверка предмета
 local function isAllowed(item)
     if item:IsA("ObjectValue") then return false end
-    if alreadyCloned[item.Name] then return false end
     for _, word in ipairs(blockedWords) do
         if string.find(item.Name:lower(), word:lower()) then
             return false
         end
     end
+    if clonedInstances[item] then return false end
     return true
 end
 
@@ -118,7 +113,7 @@ local function updateItemList()
             local btn = Instance.new("TextButton", dropdownFrame)
             btn.Size = UDim2.new(1, 0, 0, 24)
             btn.Position = UDim2.new(0, 0, 0, y)
-            btn.Text = item.Name -- Убираем (Tool)
+            btn.Text = item.Name -- ❌ без (Tool)
             btn.BackgroundColor3 = Color3.fromRGB(80, 80, 80)
             btn.TextColor3 = Color3.new(1,1,1)
             btn.TextScaled = true
@@ -145,14 +140,14 @@ end)
 
 -- DUPE одного
 dupeOne.MouseButton1Click:Connect(function()
-    if selectedItem then
+    if selectedItem and isAllowed(selectedItem) then
         local clone = selectedItem:Clone()
         clone.Parent = backpack
-        alreadyCloned[selectedItem.Name] = true
+        clonedInstances[selectedItem] = true
         print("Клон добавлен:", selectedItem.Name)
         updateItemList()
     else
-        warn("Сначала выбери предмет.")
+        warn("Сначала выбери допустимый предмет.")
     end
 end)
 
@@ -163,7 +158,7 @@ dupeAll.MouseButton1Click:Connect(function()
         if isAllowed(item) then
             local clone = item:Clone()
             clone.Parent = backpack
-            alreadyCloned[item.Name] = true
+            clonedInstances[item] = true
             count += 1
         end
     end
