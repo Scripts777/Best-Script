@@ -6,7 +6,6 @@ local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
 local Backpack = LocalPlayer:WaitForChild("Backpack")
 local UserInputService = game:GetService("UserInputService")
-local GuiService = game:GetService("GuiService")
 
 -- Create GUI
 local ScreenGui = Instance.new("ScreenGui")
@@ -56,7 +55,7 @@ local selectedCategory = "Pets"
 for i, category in ipairs(categories) do
     local button = Instance.new("TextButton")
     button.Size = UDim2.new(1, -10, 0, 50)
-    button.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+    button.BackgroundColor3 = i == 1 and Color3.fromRGB(0, 150, 255) or Color3.fromRGB(60, 60, 60)
     button.Text = category.Name
     button.TextColor3 = Color3.fromRGB(255, 255, 255)
     button.TextScaled = true
@@ -162,8 +161,8 @@ end
 local function updateInputFields()
     AgeInput.Visible = selectedCategory == "Pets"
     AgeLabel.Visible = selectedCategory == "Pets"
-    WeightInput.Visible = selectedCategory ~= "Seeds"
-    WeightLabel.Visible = selectedCategory ~= "Seeds"
+    WeightInput.Visible = selectedCategory == "Pets" or selectedCategory == "Fruits"
+    WeightLabel.Visible = selectedCategory == "Pets" or selectedCategory == "Fruits"
 end
 
 -- Function to update item list in GUI
@@ -194,6 +193,9 @@ local function updateItemList()
                 button.Font = Enum.Font.SourceSans
                 button.Parent = ScrollFrame
                 
+                -- Ensure button is visible
+                button.Visible = true
+                
                 -- Button click handler
                 button.MouseButton1Click:Connect(function()
                     selectedItem = item
@@ -222,7 +224,7 @@ local function cloneItem()
     
     -- Get input values
     local age = selectedCategory == "Pets" and (tonumber(AgeInput.Text) or 1) or nil
-    local weight = selectedCategory ~= "Seeds" and (tonumber(WeightInput.Text) or 1.00) or nil
+    local weight = (selectedCategory == "Pets" or selectedCategory == "Fruits") and (tonumber(WeightInput.Text) or 1.00) or nil
     
     -- Clone the item
     local clonedItem = selectedItem:Clone()
@@ -231,10 +233,10 @@ local function cloneItem()
     -- Modify name to reflect new Age and Weight
     local newName = selectedItem.Name
     if weight then
-        newName = string.gsub(newName, "%[.-KG%]", string.format("[%.2f KG]", weight))
+        newName = string.gsub(newName, "%[.-KG%]", string.format("[%.2f KG]", weight)) or newName
     end
     if age then
-        newName = string.gsub(newName, "%[Age %d+%]", string.format("[Age %d]", age))
+        newName = string.gsub(newName, "%[Age %d+%]", string.format("[Age %d]", age)) or newName
     end
     clonedItem.Name = newName
     
@@ -248,6 +250,7 @@ local function cloneItem()
     
     -- Ensure cloned item is visible
     clonedItem.Enabled = true
+    clonedItem.Parent = Backpack -- Reassign to trigger visibility
     updateItemList() -- Refresh list to show cloned item
 end
 
@@ -257,8 +260,14 @@ CloneButton.MouseButton1Click:Connect(cloneItem)
 -- Update item list and input fields initially and on Backpack changes
 updateItemList()
 updateInputFields()
-Backpack.ChildAdded:Connect(updateItemList)
-Backpack.ChildRemoved:Connect(updateItemList)
+Backpack.ChildAdded:Connect(function()
+    wait() -- Small delay to ensure item is fully added
+    updateItemList()
+end)
+Backpack.ChildRemoved:Connect(function()
+    wait() -- Small delay to ensure item is fully removed
+    updateItemList()
+end)
 
 -- Make GUI draggable
 local dragging
