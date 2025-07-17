@@ -90,6 +90,7 @@ ScrollFrame.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
 ScrollFrame.BorderSizePixel = 0
 ScrollFrame.CanvasSize = UDim2.new(0, 0, 0, 0)
 ScrollFrame.ScrollBarThickness = 5
+ScrollFrame.Visible = true
 ScrollFrame.Parent = Frame
 
 local UIListLayout = Instance.new("UIListLayout")
@@ -173,10 +174,19 @@ local function updateItemList()
     end
     itemButtons = {}
     
+    -- Debug: Check if Backpack items are detected
+    local itemCount = 0
+    for _, item in pairs(Backpack:GetChildren()) do
+        if item:IsA("Tool") then
+            itemCount = itemCount + 1
+        end
+    end
+    print("Detected " .. itemCount .. " tools in Backpack")
+    
     -- Populate with valid items from Backpack based on category
     local canvasHeight = 0
     for _, item in pairs(Backpack:GetChildren()) do
-        if item:IsA("Tool") and not isExcludedItem(item.Name) then
+        if item:IsA("Tool") and not isExcludedItem(item.Name) and item.Parent == Backpack then
             local isPet = item:FindFirstChild("Age") and item.Age:IsA("NumberValue")
             local isSeed = string.find(string.lower(item.Name), "seed")
             local isFruit = not isPet and not isSeed
@@ -191,10 +201,8 @@ local function updateItemList()
                 button.TextColor3 = Color3.fromRGB(255, 255, 255)
                 button.TextScaled = true
                 button.Font = Enum.Font.SourceSans
-                button.Parent = ScrollFrame
-                
-                -- Ensure button is visible
                 button.Visible = true
+                button.Parent = ScrollFrame
                 
                 -- Button click handler
                 button.MouseButton1Click:Connect(function()
@@ -213,6 +221,7 @@ local function updateItemList()
     
     -- Update canvas size
     ScrollFrame.CanvasSize = UDim2.new(0, 0, 0, canvasHeight)
+    print("Updated item list with " .. #itemButtons .. " items for category: " .. selectedCategory)
 end
 
 -- Function to clone item with modified attributes
@@ -258,14 +267,19 @@ end
 CloneButton.MouseButton1Click:Connect(cloneItem)
 
 -- Update item list and input fields initially and on Backpack changes
-updateItemList()
-updateInputFields()
+local function initialize()
+    wait(1) -- Wait for Backpack to fully load
+    updateItemList()
+    updateInputFields()
+end
+initialize()
+
 Backpack.ChildAdded:Connect(function()
-    wait() -- Small delay to ensure item is fully added
+    wait(0.1) -- Small delay to ensure item is fully added
     updateItemList()
 end)
 Backpack.ChildRemoved:Connect(function()
-    wait() -- Small delay to ensure item is fully removed
+    wait(0.1) -- Small delay to ensure item is fully removed
     updateItemList()
 end)
 
