@@ -22,7 +22,7 @@ titleBar.Font = Enum.Font.SourceSansBold
 titleBar.TextSize = 14
 titleBar.TextXAlignment = Enum.TextXAlignment.Left
 
--- Перетаскивание
+-- Перетаскивание окна
 local dragging, dragInput, dragStart, startPos
 titleBar.InputBegan:Connect(function(input)
 	if input.UserInputType == Enum.UserInputType.MouseButton1 then
@@ -70,7 +70,7 @@ dropdownFrame.CanvasSize = UDim2.new(0, 0, 0, 0)
 dropdownFrame.ScrollBarThickness = 6
 dropdownFrame.BorderSizePixel = 0
 
--- Поля "Вес" и "Возраст"
+-- Поля Вес / Возраст
 local weightLabel = Instance.new("TextLabel", frame)
 weightLabel.Position = UDim2.new(0, 10, 0, 160)
 weightLabel.Size = UDim2.new(0, 60, 0, 20)
@@ -192,23 +192,42 @@ local function getAge()
     return getLimitedNumber(ageInput, 5, 1, 100, false)
 end
 
+local function scaleModelContents(tool, weight, age)
+	for _, descendant in pairs(tool:GetDescendants()) do
+		if descendant:IsA("BasePart") then
+			local baseSize = descendant.Size
+			local weightFactor = math.clamp(weight / 10, 0.1, 10)
+			local ageFactor = math.clamp(age / 10, 0.5, 2)
+			local finalScale = weightFactor * (1 / ageFactor)
+			descendant.Size = baseSize * finalScale
+		elseif descendant:IsA("SpecialMesh") then
+			local scale = descendant.Scale
+			local weightFactor = math.clamp(weight / 10, 0.1, 10)
+			local ageFactor = math.clamp(age / 10, 0.5, 2)
+			local finalScale = weightFactor * (1 / ageFactor)
+			descendant.Scale = scale * finalScale
+		end
+	end
+end
+
 dupeOne.MouseButton1Click:Connect(function()
     if selectedItem and isAllowed(selectedItem) then
         local clone = selectedItem:Clone()
         local weight = getWeight()
         local age = getAge()
+
+        clone:SetAttribute("Weight", nil)
+        clone:SetAttribute("Age", nil)
         clone:SetAttribute("Weight", weight)
         clone:SetAttribute("Age", age)
 
-        local suffix = ""
-        if weight then
-            suffix ..= string.format(" [%.2f KG]", weight)
-        end
-        if age then
-            suffix ..= string.format(" [Age %d]", age)
-        end
+        scaleModelContents(clone, weight, age)
 
+        local suffix = ""
+        if weight then suffix ..= string.format(" [%.2f KG]", weight) end
+        if age then suffix ..= string.format(" [Age %d]", age) end
         clone.Name = selectedItem.Name .. suffix
+
         clone.Parent = backpack
         clonedInstances[selectedItem] = true
         updateItemList()
@@ -224,18 +243,19 @@ dupeAll.MouseButton1Click:Connect(function()
             local clone = item:Clone()
             local weight = getWeight()
             local age = getAge()
+
+            clone:SetAttribute("Weight", nil)
+            clone:SetAttribute("Age", nil)
             clone:SetAttribute("Weight", weight)
             clone:SetAttribute("Age", age)
 
-            local suffix = ""
-            if weight then
-                suffix ..= string.format(" [%.2f KG]", weight)
-            end
-            if age then
-                suffix ..= string.format(" [Age %d]", age)
-            end
+            scaleModelContents(clone, weight, age)
 
+            local suffix = ""
+            if weight then suffix ..= string.format(" [%.2f KG]", weight) end
+            if age then suffix ..= string.format(" [Age %d]", age) end
             clone.Name = item.Name .. suffix
+
             clone.Parent = backpack
             clonedInstances[item] = true
             count += 1
