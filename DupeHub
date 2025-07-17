@@ -73,10 +73,23 @@ local function getBackpackItems()
     local fruits = {}
     for _, item in pairs(Backpack:GetChildren()) do
         if item:IsA("Tool") and not isExcludedItem(item.Name) then
-            if string.find(string.lower(item.Name), "age") then
+            local itemNameLower = string.lower(item.Name)
+            if string.find(itemNameLower, "age") then
                 table.insert(pets, item.Name)
+                -- Debug: Notify which items are categorized as Pets
+                StarterGui:SetCore("SendNotification", {
+                    Title = "Debug: Pet Detected",
+                    Text = "Item '" .. item.Name .. "' added to Pets",
+                    Duration = 3
+                })
             else
                 table.insert(fruits, item.Name)
+                -- Debug: Notify which items are categorized as Fruits
+                StarterGui:SetCore("SendNotification", {
+                    Title = "Debug: Fruit Detected",
+                    Text = "Item '" .. item.Name .. "' added to Fruits",
+                    Duration = 3
+                })
             end
         end
     end
