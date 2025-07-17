@@ -1,110 +1,199 @@
--- Константы для улучшения читаемости и адаптивности
-local GUI_WIDTH_SCALE = 0.3 -- Масштаб ширины GUI (в процентах от экрана)
-local GUI_HEIGHT_SCALE = 0.4 -- Масштаб высоты GUI
-local BUTTON_SIZE = 40 -- Размер кнопки переключения
-local DROPDOWN_HEIGHT = 80 -- Высота выпадающего списка
-local ITEM_BUTTON_HEIGHT = 24 -- Высота кнопки предмета
-local MAX_ITEMS = 100 -- Максимальное количество предметов для предотвращения перегрузки
+-- Safe, visual-only cloning script for Grow a Garden (Roblox)
+-- Runs via Delta Executor, with a GUI for item selection and attribute modification
+-- Excludes items with specific words and allows renaming Age and Weight tags
 
--- Сервисы
 local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+local Backpack = LocalPlayer:WaitForChild("Backpack")
 local UserInputService = game:GetService("UserInputService")
+local GuiService = game:GetService("GuiService")
 
--- Проверка игрока и рюкзака
-local player = Players.LocalPlayer
-if not player then
-    warn("LocalPlayer not found!")
-    return
+-- Create GUI
+local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Name = "CloneGUI"
+ScreenGui.Parent = LocalPlayer:WaitForChild("PlayerGui")
+ScreenGui.ResetOnSpawn = false
+
+local Frame = Instance.new("Frame")
+Frame.Size = UDim2.new(0, 300, 0, 400)
+Frame.Position = UDim2.new(0.5, -150, 0.5, -200)
+Frame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+Frame.BorderSizePixel = 0
+Frame.Parent = ScreenGui
+
+local Title = Instance.new("TextLabel")
+Title.Size = UDim2.new(1, 0, 0, 50)
+Title.Position = UDim2.new(0, 0, 0, 0)
+Title.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+Title.Text = "Item Cloner - Grow a Garden"
+Title.TextColor3 = Color3.fromRGB(255, 255, 255)
+Title.TextScaled = true
+Title.Font = Enum.Font.SourceSansBold
+Title.Parent = Frame
+
+local ScrollFrame = Instance.new("ScrollingFrame")
+ScrollFrame.Size = UDim2.new(1, -20, 0, 200)
+ScrollFrame.Position = UDim2.new(0, 10, 0, 60)
+ScrollFrame.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+ScrollFrame.BorderSizePixel = 0
+ScrollFrame.CanvasSize = UDim2.new(0, 0, 0, 0)
+ScrollFrame.ScrollBarThickness = 5
+ScrollFrame.Parent = Frame
+
+local UIListLayout = Instance.new("UIListLayout")
+UIListLayout.Padding = UDim.new(0, 5)
+UIListLayout.Parent = ScrollFrame
+
+local AgeLabel = Instance.new("TextLabel")
+AgeLabel.Size = UDim2.new(1, -20, 0, 30)
+AgeLabel.Position = UDim2.new(0, 10, 0, 270)
+AgeLabel.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+AgeLabel.Text = "Age (days):"
+AgeLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+AgeLabel.TextXAlignment = Enum.TextXAlignment.Left
+AgeLabel.Parent = Frame
+
+local AgeInput = Instance.new("TextBox")
+AgeInput.Size = UDim2.new(0, 100, 0, 30)
+AgeInput.Position = UDim2.new(1, -110, 0, 270)
+AgeInput.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+AgeInput.TextColor3 = Color3.fromRGB(255, 255, 255)
+AgeInput.Text = "1"
+AgeInput.Parent = Frame
+
+local WeightLabel = Instance.new("TextLabel")
+WeightLabel.Size = UDim2.new(1, -20, 0, 30)
+WeightLabel.Position = UDim2.new(0, 10, 0, 310)
+WeightLabel.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+WeightLabel.Text = "Weight (KG):"
+WeightLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+WeightLabel.TextXAlignment = Enum.TextXAlignment.Left
+WeightLabel.Parent = Frame
+
+local WeightInput = Instance.new("TextBox")
+WeightInput.Size = UDim2.new(0, 100, 0, 30)
+WeightInput.Position = UDim2.new(1, -110, 0, 310)
+WeightInput.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+WeightInput.TextColor3 = Color3.fromRGB(255, 255, 255)
+WeightInput.Text = "1.00"
+WeightInput.Parent = Frame
+
+local CloneButton = Instance.new("TextButton")
+CloneButton.Size = UDim2.new(1, -20, 0, 40)
+CloneButton.Position = UDim2.new(0, 10, 0, 350)
+CloneButton.BackgroundColor3 = Color3.fromRGB(0, 120, 255)
+CloneButton.Text = "Clone Selected Item"
+CloneButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+CloneButton.TextScaled = true
+CloneButton.Font = Enum.Font.SourceSansBold
+CloneButton.Parent = Frame
+
+-- Variables to track selected item
+local selectedItem = nil
+local itemButtons = {}
+
+-- Words to exclude from item names
+local excludedWords = {"Favorite", "Trowel", "Shovel", "Spray", "Recall", "Sprinkler", "Glass", "Egg"}
+
+-- Function to check if item name contains excluded words
+local function isExcludedItem(name)
+    for _, word in ipairs(excludedWords) do
+        if string.find(string.lower(name), string.lower(word)) then
+            return true
+        end
+    end
+    return false
 end
 
-local backpack = player:WaitForChild("Backpack", 5)
-if not backpack then
-    warn("Backpack not found!")
-    return
+-- Function to update item list in GUI
+local function updateItemList()
+    -- Clear existing buttons
+    for _, button in pairs(itemButtons) do
+        button:Destroy()
+    end
+    itemButtons = {}
+    
+    -- Populate with valid items from Backpack
+    local canvasHeight = 0
+    for _, item in pairs(Backpack:GetChildren()) do
+        if item:IsA("Tool") and not isExcludedItem(item.Name) then
+            local button = Instance.new("TextButton")
+            button.Size = UDim2.new(1, -10, 0, 30)
+            button.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+            button.Text = item.Name
+            button.TextColor3 = Color3.fromRGB(255, 255, 255)
+            button.TextScaled = true
+            button.Font = Enum.Font.SourceSans
+            button.Parent = ScrollFrame
+            
+            -- Button click handler
+            button.MouseButton1Click:Connect(function()
+                selectedItem = item
+                for _, btn in pairs(itemButtons) do
+                    btn.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+                end
+                button.BackgroundColor3 = Color3.fromRGB(0, 150, 255)
+            end)
+            
+            table.insert(itemButtons, button)
+            canvasHeight = canvasHeight + 35
+        end
+    end
+    
+    -- Update canvas size
+    ScrollFrame.CanvasSize = UDim2.new(0, 0, 0, canvasHeight)
 end
 
--- GUI
-local gui = Instance.new("ScreenGui")
-gui.Name = "BackpackDupeGUI"
-gui.ResetOnSpawn = false
-gui.Parent = player:WaitForChild("PlayerGui", 5)
-
--- Toggle Button
-local toggleButton = Instance.new("ImageButton")
-toggleButton.Size = UDim2.new(0, BUTTON_SIZE, 0, BUTTON_SIZE)
-toggleButton.Position = UDim2.new(0, 10, 0.5, -BUTTON_SIZE / 2)
-toggleButton.BackgroundColor3 = Color3.fromRGB(100, 100, 100)
-toggleButton.Image = "rbxassetid://3926305904"
-toggleButton.ImageRectOffset = Vector2.new(324, 364)
-toggleButton.ImageRectSize = Vector2.new(36, 36)
-toggleButton.BackgroundTransparency = 0
-toggleButton.BorderSizePixel = 0
-toggleButton.ClipsDescendants = true
-toggleButton.ZIndex = 10
-toggleButton.AutoButtonColor = true
-toggleButton.AnchorPoint = Vector2.new(0, 0.5)
-toggleButton:SetAttribute("Dragging", false)
-toggleButton:SetAttribute("DragOffset", Vector2.new())
-
--- Перетаскивание кнопки с ограничением по экрану
-toggleButton.InputBegan:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 then
-        toggleButton:SetAttribute("Dragging", true)
-        toggleButton:SetAttribute("DragOffset", Vector2.new(
-            input.Position.X - toggleButton.AbsolutePosition.X,
-            input.Position.Y - toggleButton.AbsolutePosition.Y
-        ))
+-- Function to clone item with modified attributes
+local function cloneItem()
+    if not selectedItem then
+        warn("No item selected!")
+        return
     end
-end)
-
-toggleButton.InputEnded:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 then
-        toggleButton:SetAttribute("Dragging", false)
+    
+    -- Get input values
+    local age = tonumber(AgeInput.Text) or 1
+    local weight = tonumber(WeightInput.Text) or 1.00
+    
+    -- Clone the item
+    local clonedItem = selectedItem:Clone()
+    clonedItem.Parent = Backpack
+    
+    -- Modify name to reflect new Age and Weight
+    local newName = selectedItem.Name
+    newName = string.gsub(newName, "%[.-KG%]", string.format("[%.2f KG]", weight))
+    newName = string.gsub(newName, "%[Age %d+%]", string.format("[Age %d]", age))
+    clonedItem.Name = newName
+    
+    -- Modify attributes if they exist
+    if clonedItem:FindFirstChild("Age") and clonedItem.Age:IsA("NumberValue") then
+        clonedItem.Age.Value = age
     end
-end)
-
-UserInputService.InputChanged:Connect(function(input)
-    if toggleButton:GetAttribute("Dragging") and input.UserInputType == Enum.UserInputType.MouseMovement then
-        local offset = toggleButton:GetAttribute("DragOffset")
-        local screenSize = game:GetService("GuiService"):GetScreenResolution()
-        local newX = math.clamp(input.Position.X - offset.X, 0, screenSize.X - toggleButton.AbsoluteSize.X)
-        local newY = math.clamp(input.Position.Y - offset.Y, 0, screenSize.Y - toggleButton.AbsoluteSize.Y)
-        toggleButton.Position = UDim2.new(0, newX, 0, newY)
+    if clonedItem:FindFirstChild("Weight") and clonedItem.Weight:IsA("NumberValue") then
+        clonedItem.Weight.Value = weight
     end
-end)
+end
 
--- Главное окно
-local frame = Instance.new("Frame")
-frame.Size = UDim2.new(GUI_WIDTH_SCALE, 0, GUI_HEIGHT_SCALE, 0)
-frame.Position = UDim2.new(0.5, 0, 0.5, 0)
-frame.AnchorPoint = Vector2.new(0.5, 0.5)
-frame.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-frame.BorderSizePixel = 0
-frame.Visible = false
-frame.Parent = gui
+-- Connect clone button
+CloneButton.MouseButton1Click:Connect(cloneItem)
 
-toggleButton.MouseButton1Click:Connect(function()
-    frame.Visible = not frame.Visible
-end)
+-- Update item list initially and on Backpack changes
+updateItemList()
+Backpack.ChildAdded:Connect(updateItemList)
+Backpack.ChildRemoved:Connect(updateItemList)
 
--- Заголовок
-local titleBar = Instance.new("TextLabel")
-titleBar.Size = UDim2.new(1, 0, 0, 20)
-titleBar.Text = "📦 Backpack Dupe"
-titleBar.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
-titleBar.TextColor3 = Color3.new(1, 1, 1)
-titleBar.Font = Enum.Font.SourceSansBold
-titleBar.TextSize = 14
-titleBar.TextXAlignment = Enum.TextXAlignment.Left
-titleBar.Parent = frame
+-- Make GUI draggable
+local dragging
+local dragInput
+local dragStart
+local startPos
 
--- Перетаскивание окна
-local dragging, dragInput, dragStart, startPos
-titleBar.InputBegan:Connect(function(input)
+Frame.InputBegan:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.MouseButton1 then
         dragging = true
         dragStart = input.Position
-        startPos = frame.Position
+        startPos = Frame.Position
+        
         input.Changed:Connect(function()
             if input.UserInputState == Enum.UserInputState.End then
                 dragging = false
@@ -113,283 +202,23 @@ titleBar.InputBegan:Connect(function(input)
     end
 end)
 
-titleBar.InputChanged:Connect(function(input)
+Frame.InputChanged:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.MouseMovement then
         dragInput = input
     end
 end)
 
 UserInputService.InputChanged:Connect(function(input)
-    if input == dragInput and dragging then
+    if dragging and input == dragInput then
         local delta = input.Position - dragStart
-        frame.Position = UDim2.new(
-            startPos.X.Scale, startPos.X.Offset + delta.X,
-            startPos.Y.Scale, startPos.Y.Offset + delta.Y
+        Frame.Position = UDim2.new(
+            startPos.X.Scale,
+            startPos.X.Offset + delta.X,
+            startPos.Y.Scale,
+            startPos.Y.Offset + delta.Y
         )
     end
 end)
 
--- Выпадающий список
-local dropdown = Instance.new("TextButton")
-dropdown.Size = UDim2.new(1, -20, 0, 30)
-dropdown.Position = UDim2.new(0, 10, 0, 30)
-dropdown.Text = "Выберите предмет"
-dropdown.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
-dropdown.TextColor3 = Color3.new(1, 1, 1)
-dropdown.Parent = frame
-
-local dropdownFrame = Instance.new("ScrollingFrame")
-dropdownFrame.Size = UDim2.new(1, -20, 0, DROPDOWN_HEIGHT)
-dropdownFrame.Position = UDim2.new(0, 10, 0, 65)
-dropdownFrame.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
-dropdownFrame.Visible = false
-dropdownFrame.CanvasSize = UDim2.new(0, 0, 0, 0)
-dropdownFrame.ScrollBarThickness = 6
-dropdownFrame.BorderSizePixel = 0
-dropdownFrame.Parent = frame
-
--- Поля ввода
-local weightLabel = Instance.new("TextLabel")
-weightLabel.Position = UDim2.new(0, 10, 0, 160)
-weightLabel.Size = UDim2.new(0, 60, 0, 20)
-weightLabel.Text = "Вес:"
-weightLabel.BackgroundTransparency = 1
-weightLabel.TextColor3 = Color3.new(1, 1, 1)
-weightLabel.Font = Enum.Font.SourceSans
-weightLabel.TextSize = 14
-weightLabel.TextXAlignment = Enum.TextXAlignment.Left
-weightLabel.Parent = frame
-
-local weightInput = Instance.new("TextBox")
-weightInput.Position = UDim2.new(0, 70, 0, 160)
-weightInput.Size = UDim2.new(0, 60, 0, 20)
-weightInput.PlaceholderText = "10"
-weightInput.Text = ""
-weightInput.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
-weightInput.TextColor3 = Color3.new(1, 1, 1)
-weightInput.ClearTextOnFocus = false
-weightInput.Parent = frame
-
-local ageLabel = Instance.new("TextLabel")
-ageLabel.Position = UDim2.new(0, 150, 0, 160)
-ageLabel.Size = UDim2.new(0, 60, 0, 20)
-ageLabel.Text = "Возраст:"
-ageLabel.BackgroundTransparency = 1
-ageLabel.TextColor3 = Color3.new(1, 1, 1)
-ageLabel.Font = Enum.Font.SourceSans
-ageLabel.TextSize = 14
-ageLabel.TextXAlignment = Enum.TextXAlignment.Left
-ageLabel.Parent = frame
-
-local ageInput = Instance.new("TextBox")
-ageInput.Position = UDim2.new(0, 210, 0, 160)
-ageInput.Size = UDim2.new(0, 60, 0, 20)
-ageInput.PlaceholderText = "5"
-ageInput.Text = ""
-ageInput.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
-ageInput.TextColor3 = Color3.new(1, 1, 1)
-ageInput.ClearTextOnFocus = false
-ageInput.Parent = frame
-
--- Кнопки
-local dupeOne = Instance.new("TextButton")
-dupeOne.Size = UDim2.new(0.48, -5, 0, 30)
-dupeOne.Position = UDim2.new(0, 10, 0, 270)
-dupeOne.Text = "DUPE"
-dupeOne.BackgroundColor3 = Color3.fromRGB(0, 150, 0)
-dupeOne.TextColor3 = Color3.new(1, 1, 1)
-dupeOne.Parent = frame
-
-local dupeAll = Instance.new("TextButton")
-dupeAll.Size = UDim2.new(0.48, -5, 0, 30)
-dupeAll.Position = UDim2.new(0.52, 0, 0, 270)
-dupeAll.Text = "DUPE ВСЁ"
-dupeAll.BackgroundColor3 = Color3.fromRGB(150, 0, 0)
-dupeAll.TextColor3 = Color3.new(1, 1, 1)
-dupeAll.Parent = frame
-
--- Визуальная обратная связь
-local function showError(message)
-    local errorLabel = Instance.new("TextLabel")
-    errorLabel.Size = UDim2.new(1, -20, 0, 20)
-    errorLabel.Position = UDim2.new(0, 10, 0, 190)
-    errorLabel.Text = message
-    errorLabel.TextColor3 = Color3.fromRGB(255, 0, 0)
-    errorLabel.BackgroundTransparency = 1
-    errorLabel.TextScaled = true
-    errorLabel.Parent = frame
-    task.delay(3, function() errorLabel:Destroy() end)
-end
-
--- Логика
-local selectedItem = nil
-local clonedInstances = {}
-local itemButtons = {} -- Кэш кнопок для оптимизации
-
-local blockedWords = {
-    "Favorite", "Trowel", "Shovel", "Spray",
-    "Recall", "Sprinkler", "Glass", "Egg"
-}
-
--- Проверка допустимости предмета
-local function isAllowed(item)
-    if item:IsA("ObjectValue") then return false end
-    for _, word in ipairs(blockedWords) do
-        if string.find(item.Name:lower(), word:lower()) then return false end
-    end
-    if clonedInstances[item] then return false end
-    return true
-end
-
--- Обновление списка предметов
-local function updateItemList()
-    for _, btn in pairs(itemButtons) do
-        btn:Destroy()
-    end
-    itemButtons = {}
-    local y = 0
-    local itemCount = 0
-    for _, item in pairs(backpack:GetChildren()) do
-        if isAllowed(item) and itemCount < MAX_ITEMS then
-            local btn = Instance.new("TextButton")
-            btn.Size = UDim2.new(1, 0, 0, ITEM_BUTTON_HEIGHT)
-            btn.Position = UDim2.new(0, 0, 0, y)
-            btn.Text = item.Name
-            btn.BackgroundColor3 = Color3.fromRGB(80, 80, 80)
-            btn.TextColor3 = Color3.new(1, 1, 1)
-            btn.TextScaled = true
-            btn.Parent = dropdownFrame
-            btn.MouseButton1Click:Connect(function()
-                selectedItem = item
-                dropdown.Text = "Выбран: " .. item.Name
-                dropdownFrame.Visible = false
-            end)
-            table.insert(itemButtons, btn)
-            y += ITEM_BUTTON_HEIGHT
-            itemCount += 1
-        end
-    end
-    dropdownFrame.CanvasSize = UDim2.new(0, 0, 0, y)
-end
-
-dropdown.MouseButton1Click:Connect(function()
-    dropdownFrame.Visible = not dropdownFrame.Visible
-    if dropdownFrame.Visible then updateItemList() end
-end)
-
--- Получение числового значения с проверкой
-local function getLimitedNumber(input, default, min, max, roundToDecimal)
-    local value = tonumber(input.Text) or tonumber(input.PlaceholderText) or default
-    if not value then
-        showError("Некорректный ввод, использую: " .. default)
-        return default
-    end
-    value = math.clamp(value, min, max)
-    if roundToDecimal then
-        return math.floor(value * 100 + 0.5) / 100
-    end
-    return math.floor(value)
-end
-
-local function getWeight()
-    return getLimitedNumber(weightInput, 10, 0.1, 100, true)
-end
-
-local function getAge()
-    return getLimitedNumber(ageInput, 5, 1, 100, false)
-end
-
--- Очистка имени предмета от суффиксов
-local function cleanName(name)
-    return name
-        :gsub("%s*%[.-%s*KG%]", "")
-        :gsub("%s*%[Age%s*%d+%]", "")
-        :gsub("%s+", " ")
-        :match("^%s*(.-)%s*$") or name
-end
-
--- Масштабирование содержимого модели
-local function scaleModelContents(tool, weight, age)
-    for _, descendant in pairs(tool:GetDescendants()) do
-        if descendant:IsA("BasePart") then
-            local baseSize = descendant.Size
-            local weightFactor = math.clamp(weight / 10, 0.1, 10)
-            local ageFactor = math.clamp(age / 10, 0.5, 2)
-            local finalScale = weightFactor * (1 / ageFactor)
-            descendant.Size = baseSize * finalScale
-        elseif descendant:IsA("SpecialMesh") then
-            local scale = descendant.Scale
-            local weightFactor = math.clamp(weight / 10, 0.1, 10)
-            local ageFactor = math.clamp(age / 10, 0.5, 2)
-            local finalScale = weightFactor * (1 / ageFactor)
-            descendant.Scale = scale * finalScale
-        end
-    end
-end
-
--- Анимация размера клона (оптимизирована)
-local function animateCloneSize(tool)
-    local parts = {}
-    for _, part in ipairs(tool:GetDescendants()) do
-        if part:IsA("BasePart") then
-            table.insert(parts, {part = part, originalSize = part.Size})
-            part.Size = part.Size * 0.1
-        end
-    end
-    task.spawn(function()
-        for i = 1, 10 do
-            for _, data in ipairs(parts) do
-                data.part.Size = data.part.Size:Lerp(data.originalSize, 0.25)
-            end
-            task.wait(0.02)
-        end
-        for _, data in ipairs(parts) do
-            data.part.Size = data.originalSize
-        end
-    end)
-end
-
--- Дублирование предмета
-local function dupeItem(item)
-    local clone = item:Clone()
-    local weight = getWeight()
-    local age = getAge()
-    clone:SetAttribute("Weight", weight)
-    clone:SetAttribute("Age", age)
-    scaleModelContents(clone, weight, age)
-    animateCloneSize(clone)
-    clone.Name = cleanName(item.Name) .. string.format(" [%.2f KG] [Age %d]", weight, age)
-    clone.Parent = backpack
-    clonedInstances[item] = true
-    showError("Предмет " .. item.Name .. " скопирован!")
-end
-
--- Обработчик кнопки "DUPE"
-dupeOne.MouseButton1Click:Connect(function()
-    if selectedItem and isAllowed(selectedItem) then
-        dupeItem(selectedItem)
-        updateItemList()
-    else
-        showError("Сначала выберите предмет!")
-    end
-end)
-
--- Обработчик кнопки "DUPE ВСЁ"
-dupeAll.MouseButton1Click:Connect(function()
-    local count = 0
-    for _, item in pairs(backpack:GetChildren()) do
-        if isAllowed(item) then
-            dupeItem(item)
-            count += 1
-        end
-    end
-    showError("Скопировано предметов: " .. count)
-    updateItemList()
-end)
-
--- Очистка кэша клонированных предметов при обновлении
-local function resetClonedInstances()
-    clonedInstances = {}
-end
-backpack.ChildAdded:Connect(resetClonedInstances)
-backpack.ChildRemoved:Connect(resetClonedInstances)
+-- Ensure script is visual-only and safe
+print("Safe visual cloning script loaded. Use the GUI to select and clone items.")
