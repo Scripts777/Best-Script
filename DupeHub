@@ -14,8 +14,8 @@ ScreenGui.Parent = LocalPlayer:WaitForChild("PlayerGui")
 ScreenGui.ResetOnSpawn = false
 
 local Frame = Instance.new("Frame")
-Frame.Size = UDim2.new(0, 350, 0, 300)
-Frame.Position = UDim2.new(0.5, -175, 0.5, -150)
+Frame.Size = UDim2.new(0, 350, 0, 400)
+Frame.Position = UDim2.new(0.5, -175, 0.5, -200)
 Frame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
 Frame.BorderSizePixel = 0
 Frame.Parent = ScreenGui
@@ -84,8 +84,8 @@ end
 
 -- Item list
 local ScrollFrame = Instance.new("ScrollingFrame")
-ScrollFrame.Size = UDim2.new(0, 200, 0, 150)
-ScrollFrame.Position = UDim2.new(0, 120, 0, 50)
+ScrollFrame.Size = UDim2.new(1, -20, 0, 200)
+ScrollFrame.Position = UDim2.new(0, 10, 0, 50)
 ScrollFrame.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
 ScrollFrame.BorderSizePixel = 0
 ScrollFrame.CanvasSize = UDim2.new(0, 0, 0, 0)
@@ -98,8 +98,8 @@ UIListLayout.Padding = UDim.new(0, 5)
 UIListLayout.Parent = ScrollFrame
 
 local AgeLabel = Instance.new("TextLabel")
-AgeLabel.Size = UDim2.new(0, 200, 0, 25)
-AgeLabel.Position = UDim2.new(0, 120, 0, 210)
+AgeLabel.Size = UDim2.new(1, -20, 0, 25)
+AgeLabel.Position = UDim2.new(0, 10, 0, 260)
 AgeLabel.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
 AgeLabel.Text = "Age (days):"
 AgeLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
@@ -108,15 +108,15 @@ AgeLabel.Parent = Frame
 
 local AgeInput = Instance.new("TextBox")
 AgeInput.Size = UDim2.new(0, 80, 0, 25)
-AgeInput.Position = UDim2.new(0, 240, 0, 210)
+AgeInput.Position = UDim2.new(1, -90, 0, 260)
 AgeInput.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
 AgeInput.TextColor3 = Color3.fromRGB(255, 255, 255)
 AgeInput.Text = "1"
 AgeInput.Parent = Frame
 
 local WeightLabel = Instance.new("TextLabel")
-WeightLabel.Size = UDim2.new(0, 200, 0, 25)
-WeightLabel.Position = UDim2.new(0, 120, 0, 240)
+WeightLabel.Size = UDim2.new(1, -20, 0, 25)
+WeightLabel.Position = UDim2.new(0, 10, 0, 290)
 WeightLabel.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
 WeightLabel.Text = "Weight (KG):"
 WeightLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
@@ -125,15 +125,15 @@ WeightLabel.Parent = Frame
 
 local WeightInput = Instance.new("TextBox")
 WeightInput.Size = UDim2.new(0, 80, 0, 25)
-WeightInput.Position = UDim2.new(0, 240, 0, 240)
+WeightInput.Position = UDim2.new(1, -90, 0, 290)
 WeightInput.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
 WeightInput.TextColor3 = Color3.fromRGB(255, 255, 255)
 WeightInput.Text = "1.00"
 WeightInput.Parent = Frame
 
 local CloneButton = Instance.new("TextButton")
-CloneButton.Size = UDim2.new(0, 200, 0, 35)
-CloneButton.Position = UDim2.new(0, 120, 0, 270)
+CloneButton.Size = UDim2.new(1, -20, 0, 35)
+CloneButton.Position = UDim2.new(0, 10, 0, 320)
 CloneButton.BackgroundColor3 = Color3.fromRGB(0, 120, 255)
 CloneButton.Text = "Clone Selected Item"
 CloneButton.TextColor3 = Color3.fromRGB(255, 255, 255)
