@@ -7,11 +7,54 @@ local gui = Instance.new("ScreenGui", player:WaitForChild("PlayerGui"))
 gui.Name = "BackpackDupeGUI"
 gui.ResetOnSpawn = false
 
+-- Toggle Button
+local toggleButton = Instance.new("ImageButton", gui)
+toggleButton.Size = UDim2.new(0, 40, 0, 40)
+toggleButton.Position = UDim2.new(0, 10, 0.5, -20)
+toggleButton.BackgroundColor3 = Color3.fromRGB(100, 100, 100)
+toggleButton.Image = "rbxassetid://3926305904"
+toggleButton.ImageRectOffset = Vector2.new(324, 364)
+toggleButton.ImageRectSize = Vector2.new(36, 36)
+toggleButton.BackgroundTransparency = 0
+toggleButton.BorderSizePixel = 0
+toggleButton.ClipsDescendants = true
+toggleButton.ZIndex = 10
+toggleButton.AutoButtonColor = true
+toggleButton.AnchorPoint = Vector2.new(0, 0.5)
+toggleButton:SetAttribute("Dragging", false)
+toggleButton:SetAttribute("DragOffset", Vector2.new())
+
+toggleButton.InputBegan:Connect(function(input)
+	if input.UserInputType == Enum.UserInputType.MouseButton1 then
+		toggleButton:SetAttribute("Dragging", true)
+		toggleButton:SetAttribute("DragOffset", Vector2.new(input.Position.X - toggleButton.AbsolutePosition.X, input.Position.Y - toggleButton.AbsolutePosition.Y))
+	end
+end)
+
+toggleButton.InputEnded:Connect(function(input)
+	if input.UserInputType == Enum.UserInputType.MouseButton1 then
+		toggleButton:SetAttribute("Dragging", false)
+	end
+end)
+
+UIS.InputChanged:Connect(function(input)
+	if toggleButton:GetAttribute("Dragging") and input.UserInputType == Enum.UserInputType.MouseMovement then
+		local offset = toggleButton:GetAttribute("DragOffset")
+		toggleButton.Position = UDim2.new(0, input.Position.X - offset.X, 0, input.Position.Y - offset.Y)
+	end
+end)
+
+-- Главное окно
 local frame = Instance.new("Frame", gui)
 frame.Size = UDim2.new(0, 280, 0, 320)
 frame.Position = UDim2.new(0.5, -140, 0.5, -160)
 frame.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
 frame.BorderSizePixel = 0
+frame.Visible = false
+
+toggleButton.MouseButton1Click:Connect(function()
+	frame.Visible = not frame.Visible
+end)
 
 local titleBar = Instance.new("TextLabel", frame)
 titleBar.Size = UDim2.new(1, 0, 0, 20)
@@ -22,7 +65,7 @@ titleBar.Font = Enum.Font.SourceSansBold
 titleBar.TextSize = 14
 titleBar.TextXAlignment = Enum.TextXAlignment.Left
 
--- Перетаскивание окна
+-- Перетаскивание GUI
 local dragging, dragInput, dragStart, startPos
 titleBar.InputBegan:Connect(function(input)
 	if input.UserInputType == Enum.UserInputType.MouseButton1 then
@@ -70,7 +113,7 @@ dropdownFrame.CanvasSize = UDim2.new(0, 0, 0, 0)
 dropdownFrame.ScrollBarThickness = 6
 dropdownFrame.BorderSizePixel = 0
 
--- Поля Вес / Возраст
+-- Поля
 local weightLabel = Instance.new("TextLabel", frame)
 weightLabel.Position = UDim2.new(0, 10, 0, 160)
 weightLabel.Size = UDim2.new(0, 60, 0, 20)
@@ -192,6 +235,12 @@ local function getAge()
     return getLimitedNumber(ageInput, 5, 1, 100, false)
 end
 
+local function cleanName(name)
+	return name
+		:gsub("%s*%[.-%s*KG%]", "")
+		:gsub("%s*%[Age%s*%d+%]", "")
+end
+
 local function scaleModelContents(tool, weight, age)
 	for _, descendant in pairs(tool:GetDescendants()) do
 		if descendant:IsA("BasePart") then
@@ -210,57 +259,57 @@ local function scaleModelContents(tool, weight, age)
 	end
 end
 
+local function animateCloneSize(tool)
+	for _, part in ipairs(tool:GetDescendants()) do
+		if part:IsA("BasePart") then
+			local originalSize = part.Size
+			part.Size = originalSize * 0.1
+			task.spawn(function()
+				for i = 1, 10 do
+					part.Size = part.Size:Lerp(originalSize, 0.25)
+					task.wait(0.02)
+				end
+				part.Size = originalSize
+			end)
+		end
+	end
+end
+
+local function dupeItem(item)
+	local clone = item:Clone()
+	local weight = getWeight()
+	local age = getAge()
+	clone:SetAttribute("Weight", nil)
+	clone:SetAttribute("Age", nil)
+	clone:SetAttribute("Weight", weight)
+	clone:SetAttribute("Age", age)
+	scaleModelContents(clone, weight, age)
+	animateCloneSize(clone)
+	local suffix = ""
+	if weight then suffix ..= string.format(" [%.2f KG]", weight) end
+	if age then suffix ..= string.format(" [Age %d]", age) end
+	clone.Name = cleanName(item.Name) .. suffix
+	clone.Parent = backpack
+	clonedInstances[item] = true
+end
+
 dupeOne.MouseButton1Click:Connect(function()
-    if selectedItem and isAllowed(selectedItem) then
-        local clone = selectedItem:Clone()
-        local weight = getWeight()
-        local age = getAge()
-
-        clone:SetAttribute("Weight", nil)
-        clone:SetAttribute("Age", nil)
-        clone:SetAttribute("Weight", weight)
-        clone:SetAttribute("Age", age)
-
-        scaleModelContents(clone, weight, age)
-
-        local suffix = ""
-        if weight then suffix ..= string.format(" [%.2f KG]", weight) end
-        if age then suffix ..= string.format(" [Age %d]", age) end
-        clone.Name = selectedItem.Name .. suffix
-
-        clone.Parent = backpack
-        clonedInstances[selectedItem] = true
-        updateItemList()
-    else
-        warn("Сначала выбери предмет.")
-    end
+	if selectedItem and isAllowed(selectedItem) then
+		dupeItem(selectedItem)
+		updateItemList()
+	else
+		warn("Сначала выбери предмет.")
+	end
 end)
 
 dupeAll.MouseButton1Click:Connect(function()
-    local count = 0
-    for _, item in pairs(backpack:GetChildren()) do
-        if isAllowed(item) then
-            local clone = item:Clone()
-            local weight = getWeight()
-            local age = getAge()
-
-            clone:SetAttribute("Weight", nil)
-            clone:SetAttribute("Age", nil)
-            clone:SetAttribute("Weight", weight)
-            clone:SetAttribute("Age", age)
-
-            scaleModelContents(clone, weight, age)
-
-            local suffix = ""
-            if weight then suffix ..= string.format(" [%.2f KG]", weight) end
-            if age then suffix ..= string.format(" [Age %d]", age) end
-            clone.Name = item.Name .. suffix
-
-            clone.Parent = backpack
-            clonedInstances[item] = true
-            count += 1
-        end
-    end
-    print("Клонов добавлено:", count)
-    updateItemList()
+	local count = 0
+	for _, item in pairs(backpack:GetChildren()) do
+		if isAllowed(item) then
+			dupeItem(item)
+			count += 1
+		end
+	end
+	print("Клонов добавлено:", count)
+	updateItemList()
 end)
