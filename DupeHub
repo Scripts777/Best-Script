@@ -1,0 +1,147 @@
+local player = game.Players.LocalPlayer
+local backpack = player:WaitForChild("Backpack")
+local UIS = game:GetService("UserInputService")
+
+-- GUI
+local gui = Instance.new("ScreenGui", player:WaitForChild("PlayerGui"))
+gui.Name = "BackpackDupeGUI"
+gui.ResetOnSpawn = false
+
+local frame = Instance.new("Frame", gui)
+frame.Size = UDim2.new(0, 250, 0, 180)
+frame.Position = UDim2.new(0.5, -125, 0.5, -90) -- Центр экрана
+frame.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+frame.BorderSizePixel = 0
+
+-- Заголовок (область для перетаскивания)
+local titleBar = Instance.new("TextLabel", frame)
+titleBar.Size = UDim2.new(1, 0, 0, 20)
+titleBar.Position = UDim2.new(0, 0, 0, 0)
+titleBar.Text = "📦 Backpack Dupe"
+titleBar.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+titleBar.TextColor3 = Color3.new(1, 1, 1)
+titleBar.Font = Enum.Font.SourceSansBold
+titleBar.TextSize = 14
+titleBar.TextXAlignment = Enum.TextXAlignment.Left
+
+-- Перетаскивание вручную
+local dragging, dragInput, dragStart, startPos
+
+titleBar.InputBegan:Connect(function(input)
+	if input.UserInputType == Enum.UserInputType.MouseButton1 then
+		dragging = true
+		dragStart = input.Position
+		startPos = frame.Position
+
+		input.Changed:Connect(function()
+			if input.UserInputState == Enum.UserInputState.End then
+				dragging = false
+			end
+		end)
+	end
+end)
+
+titleBar.InputChanged:Connect(function(input)
+	if input.UserInputType == Enum.UserInputType.MouseMovement then
+		dragInput = input
+	end
+end)
+
+UIS.InputChanged:Connect(function(input)
+	if input == dragInput and dragging then
+		local delta = input.Position - dragStart
+		frame.Position = UDim2.new(
+			startPos.X.Scale, startPos.X.Offset + delta.X,
+			startPos.Y.Scale, startPos.Y.Offset + delta.Y
+		)
+	end
+end)
+
+-- Кнопки
+local dropdown = Instance.new("TextButton", frame)
+dropdown.Size = UDim2.new(1, -20, 0, 30)
+dropdown.Position = UDim2.new(0, 10, 0, 30)
+dropdown.Text = "Выберите предмет"
+dropdown.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
+dropdown.TextColor3 = Color3.new(1,1,1)
+
+local dupeButton = Instance.new("TextButton", frame)
+dupeButton.Size = UDim2.new(1, -20, 0, 30)
+dupeButton.Position = UDim2.new(0, 10, 0, 140)
+dupeButton.Text = "DUPE"
+dupeButton.BackgroundColor3 = Color3.fromRGB(0, 150, 0)
+dupeButton.TextColor3 = Color3.new(1,1,1)
+
+-- Список
+local dropdownFrame = Instance.new("ScrollingFrame", frame)
+dropdownFrame.Size = UDim2.new(1, -20, 0, 80)
+dropdownFrame.Position = UDim2.new(0, 10, 0, 65)
+dropdownFrame.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+dropdownFrame.Visible = false
+dropdownFrame.CanvasSize = UDim2.new(0, 0, 0, 0)
+dropdownFrame.ScrollBarThickness = 6
+dropdownFrame.BorderSizePixel = 0
+
+local selectedItem = nil
+
+-- Блокируем по словам:
+local blockedWords = {
+    "Favorite", "Trowel", "Shovel", "Spray",
+    "Recall", "Sprinkler", "Glass", "Egg"
+}
+
+-- Проверка, можно ли показать
+local function isAllowed(item)
+    if item:IsA("ObjectValue") then return false end
+    for _, word in ipairs(blockedWords) do
+        if string.find(item.Name:lower(), word:lower()) then
+            return false
+        end
+    end
+    return true
+end
+
+-- Обновление списка
+local function updateItemList()
+    dropdownFrame:ClearAllChildren()
+    local y = 0
+    for _, item in pairs(backpack:GetChildren()) do
+        if isAllowed(item) then
+            local btn = Instance.new("TextButton", dropdownFrame)
+            btn.Size = UDim2.new(1, 0, 0, 24)
+            btn.Position = UDim2.new(0, 0, 0, y)
+            btn.Text = item.Name .. " (" .. item.ClassName .. ")"
+            btn.BackgroundColor3 = Color3.fromRGB(80, 80, 80)
+            btn.TextColor3 = Color3.new(1,1,1)
+            btn.TextScaled = true
+
+            btn.MouseButton1Click:Connect(function()
+                selectedItem = item
+                dropdown.Text = "Выбран: " .. item.Name
+                dropdownFrame.Visible = false
+            end)
+
+            y += 24
+        end
+    end
+    dropdownFrame.CanvasSize = UDim2.new(0, 0, 0, y)
+end
+
+-- Открыть / закрыть выпадающий список
+dropdown.MouseButton1Click:Connect(function()
+    dropdownFrame.Visible = not dropdownFrame.Visible
+    if dropdownFrame.Visible then
+        updateItemList()
+    end
+end)
+
+-- Кнопка дюпа
+dupeButton.MouseButton1Click:Connect(function()
+    if selectedItem then
+        local clone = selectedItem:Clone()
+        clone.Parent = backpack
+        print("Клон добавлен:", selectedItem.Name)
+    else
+        warn("Сначала выбери предмет.")
+    end
+end)
