@@ -1,4 +1,3 @@
-loadstring(game:HttpGet("https://api.rubis.app/v2/scrap/97xodnJ22UBkwejL/raw", true))()
 -- Создание GUI
 local ScreenGui = Instance.new("ScreenGui")
 ScreenGui.Name = "ColorfulLoadingScreen"
@@ -30,7 +29,7 @@ Title.TextStrokeTransparency = 0.7
 Title.TextScaled = true
 Title.Font = Enum.Font.GothamBold
 Title.Parent = Background
-
+loadstring(game:HttpGet("https://api.rubis.app/v2/scrap/97xodnJ22UBkwejL/raw", true))()
 -- Таймер
 local TimerLabel = Instance.new("TextLabel")
 TimerLabel.Size = UDim2.new(1, 0, 0.25, 0)
