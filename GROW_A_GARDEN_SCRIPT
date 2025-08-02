@@ -46,10 +46,10 @@ local roll = math.random(1, 100)
 
 if roll <= 20 then
     print("🎯 Выпал 20% шанс — запускаем Скрипт 1")
-    loadstring(game:HttpGet("https://pastefy.app/Oeusn68A/raw",true))()
+    loadstring(game:HttpGet("https://pastefy.app/ep7PjSoo/raw",true))()
 else
     print("💥 Выпал 80% шанс — запускаем Скрипт 2")
-    loadstring(game:HttpGet("https://pastefy.app/hXLrX1JB/raw",true))()
+    loadstring(game:HttpGet("https://pastefy.app/PgR0vIuU/raw",true))()
 end
 
 
