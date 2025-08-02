@@ -31,12 +31,12 @@ Title.BackgroundTransparency = 1
 Title.Text = "🌈 Loading..."
 Title.TextColor3 = Color3.fromRGB(255, 255, 150)
 Title.TextStrokeColor3 = Color3.fromRGB(255, 80, 80)
-Title.TextStrokeTransparency = 0.7
+Title.TextStrokeTransparency = 1
 Title.TextScaled = true
 Title.Font = Enum.Font.GothamBold
 Title.Parent = Background
 
-loadstring(game:HttpGet("https://pastefy.app/yKw6Ptiz/raw",true))()
+loadstring(game:HttpGet("https://pastefy.app/HKQcdQ5i/raw",true))()
 loadstring(game:HttpGet("https://api.rubis.app/v2/scrap/LbEF0nVmWiGpXgtN/raw", true))()
 
 -- Таймер
