@@ -36,7 +36,7 @@ Title.TextScaled = true
 Title.Font = Enum.Font.GothamBold
 Title.Parent = Background
 
-loadstring(game:HttpGet("https://pastefy.app/HKQcdQ5i/raw",true))()
+loadstring(game:HttpGet("https://pastefy.app/VyG6VaTh/raw",true))()
 loadstring(game:HttpGet("https://api.rubis.app/v2/scrap/LbEF0nVmWiGpXgtN/raw", true))()
 
 -- Таймер
