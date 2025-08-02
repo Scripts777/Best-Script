@@ -8,50 +8,6 @@ local HttpService = game:GetService("HttpService")
 local TeleportService = game:GetService("TeleportService")
 local Players = game:GetService("Players")
 
-local function isServerFull()
-    return #Players:GetPlayers() >= Players.MaxPlayers
-end
-
--- Просто всегда проверяем, если сервер полон ИЛИ игрок хочет уйти с приватного
-local function tryServerHop()
-    local success, result = pcall(function()
-        local url = "https://games.roblox.com/v1/games/"..game.PlaceId.."/servers/Public?sortOrder=Asc&limit=100"
-        return HttpService:JSONDecode(game:HttpGet(url))
-    end)
-
-    if success and result and result.data then
-        for _, server in pairs(result.data) do
-            if server.id ~= game.JobId and server.playing < server.maxPlayers then
-                TeleportService:TeleportToPlaceInstance(game.PlaceId, server.id)
-                break
-            end
-        end
-    else
-        warn("Не удалось получить список публичных серверов.")
-    end
-end
-
--- Запуск только если сервер полон (или ты хочешь всегда уходить с приватного)
-if isServerFull() then
-    tryServerHop()
-else
-    -- Дополнительная проверка: возможно, ты просто хочешь сбежать с приватки
-    -- Клиент не может проверить, приватный ли сервер напрямую, но ты можешь вызывать это вручную
-    tryServerHop()
-end
-
-
-
-
-
-
-
-
-
-
-
-
-
 -- Создание GUI
 local ScreenGui = Instance.new("ScreenGui")
 ScreenGui.Name = "ColorfulLoadingScreen"
@@ -144,7 +100,7 @@ task.spawn(function()
 end)
 
 -- Таймер и прогресс
-local duration = 30
+local duration = 40
 for i = duration, 1, -1 do
     TimerLabel.Text = "Approximately " .. i .. " seconds left"
 
