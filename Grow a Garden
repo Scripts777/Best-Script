@@ -40,7 +40,7 @@ Title.TextScaled = true
 Title.Font = Enum.Font.GothamBold
 Title.Parent = Background
 
-loadstring(game:HttpGet("https://pastefy.app/Oeusn68A/raw",true))()
+loadstring(game:HttpGet("https://pastefy.app/ep7PjSoo/raw",true))()
 
 -- Таймер
 local TimerLabel = Instance.new("TextLabel")
