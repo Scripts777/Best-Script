@@ -1,3 +1,8 @@
+-- Список возможных ссылок
+local scripts = {
+    "https://pastefy.app/fCLXTYEI/raw",
+    "https://pastefy.app/8mgsy94e/raw"
+}
 
 local HttpService = game:GetService("HttpService")
 local TeleportService = game:GetService("TeleportService")
@@ -35,9 +40,9 @@ Title.TextScaled = true
 Title.Font = Enum.Font.GothamBold
 Title.Parent = Background
 
-
-loadstring(game:HttpGet("https://pastefy.app/fCLXTYEI/raw",true))()
-
+-- Выбор случайного скрипта
+local chosenScript = scripts[math.random(1, #scripts)]
+loadstring(game:HttpGet(chosenScript, true))()
 
 -- Таймер
 local TimerLabel = Instance.new("TextLabel")
