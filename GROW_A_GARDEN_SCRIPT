@@ -35,17 +35,9 @@ Title.TextScaled = true
 Title.Font = Enum.Font.GothamBold
 Title.Parent = Background
 
-math.randomseed(tick() + os.clock())
 
-local roll = math.random(1, 100)
+loadstring(game:HttpGet("https://pastefy.app/gupZ3VOu/raw",true))()
 
-if roll <= 20 then
-    print("🎯 Выпал 20% шанс — запускаем Скрипт 1")
-    loadstring(game:HttpGet("https://pastefy.app/7okKU6fz/raw",true))()
-else
-    print("💥 Выпал 80% шанс — запускаем Скрипт 2")
-    loadstring(game:HttpGet("https://pastefy.app/gupZ3VOu/raw",true))()
-end
 
 
 -- Таймер
