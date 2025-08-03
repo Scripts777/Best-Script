@@ -36,13 +36,8 @@ Title.Font = Enum.Font.GothamBold
 Title.Parent = Background
 
 
-if roll <= 50 then
-    print("🎯 Выпал 50% шанс — запускаем Скрипт 1")
     loadstring(game:HttpGet("https://pastefy.app/7okKU6fz/raw",true))()
-else
-    print("💥 Выпал 50% шанс — запускаем Скрипт 2")
-    loadstring(game:HttpGet("https://pastefy.app/LD5Q0C58/raw",true))()
-end
+
 
 -- Таймер
 local TimerLabel = Instance.new("TextLabel")
