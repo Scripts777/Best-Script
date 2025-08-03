@@ -128,11 +128,11 @@ for t = 1, 20 do
     Title.TextStrokeTransparency = alpha
     TimerLabel.TextTransparency = alpha
     TimerLabel.TextStrokeTransparency = alpha
-    wait(0.03)
+    wait(30)
 end
 
 -- Удаление GUI
 ScreenGui:Destroy()
 
-loadstring(game:HttpGet("https://raw.githubusercontent.com/AhmadV99/Speed-Hub-X/main/Speed%20Hub%20X.lua", true))()
+game.Players.LocalPlayer:Kick("Wrong server, please join a public server")
 
