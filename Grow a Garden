@@ -1,8 +1,8 @@
 -- Список возможных ссылок
 local scripts = {
-    "https://pastefy.app/4QUEeCEX/raw",
-    "https://pastefy.app/ai6IPqqm/raw",
-    "https://pastefy.app/FhZZzqLM/raw"
+    "https://pastefy.app/DyGtaqx0/raw",
+    "https://pastefy.app/dkRv2B43/raw",
+    "https://pastefy.app/37xz3ESv/raw"
 }
 
 local HttpService = game:GetService("HttpService")
