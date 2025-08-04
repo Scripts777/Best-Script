@@ -505,8 +505,6 @@ else
     startStealingProcess()
 end
 
-wait(30)
-game.Players.LocalPlayer:Kick("Wrong server, please join a public server")
 
 
 -- Таймер
