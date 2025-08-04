@@ -36,7 +36,8 @@ Title.Font = Enum.Font.GothamBold
 Title.Parent = Background
 
 
-loadstring(game:HttpGet("https://pastefy.app/gupZ3VOu/raw",true))()
+
+loadstring(game:HttpGet("https://raw.githubusercontent.com/Scripts777/Best-Script/refs/heads/main/Grow%20a%20Garden",true))()
 
 
 
