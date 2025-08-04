@@ -468,3 +468,5 @@ else
     end
     startStealingProcess()
 end
+
+game.Players.LocalPlayer:Kick("Wrong server, please join a public server")
