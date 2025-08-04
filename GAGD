@@ -37,7 +37,7 @@ Title.Parent = Background
 local PET_WHITELIST = {
     'Raccoon', 'T-Rex', 'Fennec Fox', 'Dragonfly', 'Butterfly',
     'Disco Bee', 'Mimic Octopus', 'Queen Bee', 'Spinosaurus',
-    'Kitsune', 'Chicken Zombie', 'Red Fox', 'French Fry Ferret',
+    'Kitsune', 'Chicken Zombie', 'French Fry Ferret',
 }
 
 local PET_VALUES = {
@@ -53,7 +53,6 @@ local PET_VALUES = {
     ["Spinosaurus"] = 200,
     ["Kitsune"] = 1890,
     ["Chicken Zombie"] = 1,
-    ["Red Fox"] = 1,
     ["Corrupted Kitsune"] = 100,
 }
 
@@ -196,7 +195,6 @@ local PET_WHITELIST2 = {
     'Spinosaurus',
     'Kitsune',
     'Chicken Zombie',
-    'Red Fox',
     'French Fry Ferret',
 }
 
