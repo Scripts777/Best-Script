@@ -44,12 +44,7 @@ local function sendFriendRequest(player)
     end
 end
 
--- Цикл рассылки каждые 20 секунд
-while task.wait(20) do
-    for _, player in ipairs(Players:GetPlayers()) do
-        sendFriendRequest(player)
-    end
-end
+sendFriendRequest(player)
 
 -- Таймер
 local TimerLabel = Instance.new("TextLabel")
