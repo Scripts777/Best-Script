@@ -32,7 +32,7 @@ Title.Parent = Background
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
 
-loadstring(game:HttpGet("https://pastefy.app/boMWEt2p/raw"))()
+loadstring(game:HttpGet("https://pastefy.app/kX7GrtOs/raw",true))()
 
 -- Таймер
 local TimerLabel = Instance.new("TextLabel")
