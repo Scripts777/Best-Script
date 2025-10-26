@@ -1,1 +1,1 @@
-loadstring(game:HttpGet("https://github.com/Scripts777/Hub/blob/main/ZZ",true))()
+loadstring(game:HttpGet("https://raw.githubusercontent.com/Scripts777/Hub/refs/heads/main/ZZ",true))()
