@@ -1,3 +1,4 @@
+No
 if getgenv().scriptAlreadyRan then
     warn("⚠️ Script already ran.")
     return
