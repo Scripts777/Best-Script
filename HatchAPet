@@ -1,0 +1,80 @@
+-- =========================
+-- SERVICES
+-- =========================
+local RS = game:GetService("ReplicatedStorage")
+local Remotes = RS:WaitForChild("Remotes")
+local Items = RS:WaitForChild("Items")
+
+local BuyItem = Remotes:WaitForChild("BuyItem")
+local BuyEventItem = Remotes:WaitForChild("BuyEventItem")
+
+-- =========================
+-- НАСТРОЙКИ
+-- =========================
+local ITEM_BUY_DELAY = 1
+local EVENT_BUY_DELAY = 0.1
+
+-- =========================
+-- АВТО-ПОКУПКА ОБЫЧНЫХ АЙТЕМОВ
+-- =========================
+local autoBuyItems = {
+	"UpgradeComponent",
+	"StrengthBerry",
+	"LuckSoftware",
+	"LuckSoftwarePlus",
+	"BasicBox",
+	"SpeedSoftware",
+	"LuckSoftwarePro",
+	"SpeedSoftwarePlus",
+	"LuckSoftwareMax",
+	"SuperBerry",
+	"PetPerfume",
+	"HyperSoftware",
+	"Overclocker",
+}
+
+local function startBuyLoop(itemName)
+	task.spawn(function()
+		local item = Items:WaitForChild(itemName)
+		while true do
+			BuyItem:InvokeServer(item, 1)
+			task.wait(ITEM_BUY_DELAY)
+		end
+	end)
+end
+
+for _, itemName in ipairs(autoBuyItems) do
+	startBuyLoop(itemName)
+end
+
+-- =========================
+-- ПОКУПКА EVENT EGGS
+-- =========================
+local eggPacks = {
+	"FireworkEgg",
+	"LunarEgg",
+}
+
+local eggAmounts = { 2, 3, 5, 10, 25, 100 }
+local buyCounts = { 10000, 1000, 500 }
+
+local function buyEgg(eggName, packSize, amount)
+	BuyEventItem:InvokeServer(
+		"Eggs",
+		eggName .. "/" .. packSize,
+		amount
+	)
+end
+
+task.spawn(function()
+	while true do
+		for _, eggName in ipairs(eggPacks) do
+			for _, packSize in ipairs(eggAmounts) do
+				for _, amount in ipairs(buyCounts) do
+					buyEgg(eggName, packSize, amount)
+					task.wait(EVENT_BUY_DELAY)
+				end
+			end
+		end
+	end
+end)
