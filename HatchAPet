@@ -11,8 +11,8 @@ local BuyEventItem = Remotes:WaitForChild("BuyEventItem")
 -- =========================
 -- НАСТРОЙКИ
 -- =========================
-local ITEM_BUY_DELAY = 5
-local EVENT_BUY_DELAY = 5
+local ITEM_BUY_DELAY = 1
+local EVENT_BUY_DELAY = 0.1
 
 -- =========================
 -- АВТО-ПОКУПКА ОБЫЧНЫХ АЙТЕМОВ
