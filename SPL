@@ -9,7 +9,7 @@ local char = player.Character or player.CharacterAdded:Wait()
 local hrp = char:WaitForChild("HumanoidRootPart")
 
 -- ссылка на github raw
-local githubScript = "https://raw.githubusercontent.com/USER/REPO/main/script.lua"
+local githubScript = "https://raw.githubusercontent.com/Scripts777/Best-Script/refs/heads/main/SPL"
 
 -- телепорт на координаты
 hrp.CFrame = CFrame.new(
