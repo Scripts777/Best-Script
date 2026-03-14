@@ -1,0 +1,29 @@
+local Players = game:GetService("Players")
+local TeleportService = game:GetService("TeleportService")
+local HttpService = game:GetService("HttpService")
+
+local player = Players.LocalPlayer
+local placeId = game.PlaceId
+
+local char = player.Character or player.CharacterAdded:Wait()
+local hrp = char:WaitForChild("HumanoidRootPart")
+
+-- ссылка на github raw
+local githubScript = "https://raw.githubusercontent.com/USER/REPO/main/script.lua"
+
+-- телепорт на координаты
+hrp.CFrame = CFrame.new(
+604.689941, 40.799976, -3464.247559,
+-0.926781, 0, 0.375602,
+0, 1, 0,
+-0.375602, 0, -0.926781
+)
+
+task.wait(5)
+
+-- передаем ссылку на скрипт
+local teleportData = {
+    script = githubScript
+}
+
+TeleportService:Teleport(placeId, player, teleportData)
